@@ -8,7 +8,6 @@
 
 \section{Bevezetés}
 
-Lorem Ipsum...
 
 \section{Alapok}
 
@@ -46,11 +45,70 @@ Ezután még az így kapott összegre alkalmazunk egy úgynevezett aktivációs 
 
 \begin{figure}[h!]
   \includegraphics[width=\linewidth]{neuron.png}
-  \caption{Általános nézet}
+  \caption{Egy neuron}
 \end{figure}
 
 Az aktivációs függvény rendeltetése, hogy a lineáris kombináció és a bias hozzáadása után keletkezett - várhatóan 1-nél nagyobb - számot visszaskálázzuk a [0-1] intervallumba.
-Többféle aktivációs függvény is használhatunk. Gyakoriak:
+Többféle aktivációs függvény is használhatunk, leggyakoribbak a:
+
+\begin{itemize}  
+	\item Sigmoid: $f(x) = \frac{e^x}{e^x+1}$ 
+	\item ReLU : $f(x) = max(0,x)$
+\end{itemize}
+
+Az input neuronoknál nem tudjuk kiszámolni a lineáris kombinációt, mivel nincs előző réteg, az ő esetükben egyenesen az aktivációs értéket állítjuk be inputnak. Miután minden input neuron aktivációs értékét beállítottuk látható, hogy az egész hálón végig fog menni egy változás, mert iteratívan minden réteget megelőző réteg megváltozik, tehát a maga a réteg is megváltozik.
+
+Arra, hogy a neurális háló súlyai és biasei milyen értékek kezdetben, több lehetőség is van:
+\begin{itemize}  
+	\item mindegyik 0 vagy mindegyik súly 1
+	\item valamilyen eloszlásból generált random számok
+	\item fájlból betöltött értékek (tanítás folytatása esetén)
+\end{itemize}
+
+Ha tehát megadunk egy inputot, akkor az meghatározza az output layer neuronjainak konkrét aktivációs értékeit. Ez az érték lista a függvény kimenete. Érezhető, hogy ha egyszerűen tetszőleges inputokra rá eresztjük ezt a kalkulációt, akkor az nagyjából random outputokat fog generálni. A tanítás alapú mesterséges intelligencia algoritmusoknál azonban rendelkezésünkre állnak helyes input-output párok egy listája, vagyis egy inputhoz már kétféle outputot is tudunk mondani: az adathalmaz outputját, illetve ezt a randomnak tűnő outputot amit a háló generál.
+
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{kapott_vart.png}
+  \caption{A kapott érték nem egyezik meg a várttal}
+\end{figure}
+
+Ha a hálónk, nem képes a várt kimenetet megközelíteni, akkor a mi megközelítésünkben hibázik. Olyan módon kell változtatni a neurális háló súlyait és biaseit, hogy ezek a hibák minimálisak legyenek, hiszen ekkor a predikció is pontos. Ennek megvalósításához elengedhetetlen, hogy a hibát számszerűsíteni tudjuk.
+
+Azon függvényeket, melyek egy $t$ várt és egy $x$ kapott vektorhoz kiszámítanak egy hibát, $\lambda(x,t)$ loss fuctionöknek nevezzük.
+
+\subsection{Backpropagation}
+
+Minden input-output párra meg kell változtatni a súlyokat és biaseket, mindegyiket más mértékben. Minél jobban felelős egy súly a hibáért annál jobban meg kell azt változtatni. A felelősség eldöntéséhez backpropagáljuk a hibát, vagyis a hiba vektort aktivációs értékként beállítjuk az output layernek és fordított irányban végrehajtjuk a rétegek neuronjainak aktivációját.
+Például: ha a hibavektor egyik neuronja 0, tehát az adott értéket pontosan jósolta meg a háló, akkor a hozzá tartozó súlyoknak semmilyen felelőssége nincsen a hibában, ezért a 0 érték propagálódik vissza rajtuk.
+
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{backprop_single_error.png}
+  \caption{Egy neuron felelőssége a mögötte lévő rétegben}
+\end{figure}
+
+A felelősséget végül nem a súlyokon, hanem a neuronokon fogjuk realizálni. A backpropagation végeztével tehát minden neuronon lesz egy felelősség érték.
+
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{backprop_all_error.png}
+  \caption{Egy réteg teljes felelőssége a mögötte lévő rétegben}
+\end{figure}
+
+A neuronokon azonban nincs mit megváltoztatni, csak a súlyok és biasek változtatása lehetséges. A súlyok megváltoztatására a képlet az alábbi:
+$$ w_{new} =  w_{old} + b_{error} * a_{activation} * l $$
+ahol $w$-vel jelölt értékekkel, a megváltoztatás előtti, illetve utáni súlyokat jelöljük, $a$ az - irányított - él kezdőpontja, $b$ pedig a végpontja, $l$ pedig a tanulás sebessége.
+
+A backpropagationt több input-output párra is el kell végezzük, ekkor visszünk be információt a rendszerbe arról, hogy mely párokat tartunk helyesnek, és végül az algoritmus ebből fogja ezt a véges tudását általánosítani bármilyen - korábban nem látott - inputra. Azt a folyamatot amikor az összes kívánt párra lefuttatjuk a backpropagationt $epochnak$ nevezzük. 
+
+Ha általában meg szeretnénk mérni azt, hogy a jelenlegi háló milyen hatásfokkal tud perdiktálni, akkor nem elég a tanítás közben megnézni, mekkora hibákat backpropagál program, mivel az egész háló arra van optimalizálva, hogy erre a konkrét tanító adathalmazra hatékonyan működjön. Éppen ezért a tanítás előtt két részre osztjuk az adathalmazt:
+
+\begin{itemize}  
+	\item tanító adatok (train set): amelyeken végrehajtuk a backpropagationt, 1 epochban minden adatra egyszer
+	\item validációs adatok (validation set): minden epoch végén leteszteljük ezekre az adatokra, hogy mekkora hiba keletkezik, backpropagationt viszont nem futtatunk a hibákon
+\end{itemize}
+
+A backpropagationt a gyakorlatban nem szokás minden egyes tanító adatpár után lefuttatni, hanem egyszerre több adatnak az aggregált hibáját vezetjük vissza a súlyok megváltoztatásához. Ez párhuzamosításra ad lehetőséget, amely nagy mértékben tudja csökkenteni a futásidőt.
+
+Az epoch szám megválasztásánál figyelni kell arra, hogy a hálót ne tanítsuk túl (overfitting). vagyis ne specialázájuk rá túl nagy mértékben a tanító adathalmazra, valamint ennek ellenkezője, az alul tanítás (underfitting) is pontatlanságot eredményez, amikor egyszerűen a háló még a tanító adatokra sem képes megfelelő pontossággal prediktálni.
 
 \subsection{Konvolúciós hálók}
 
