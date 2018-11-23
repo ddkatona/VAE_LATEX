@@ -112,7 +112,27 @@ Az epoch szám megválasztásánál figyelni kell arra, hogy a hálót ne tanít
 
 \subsection{Konvolúciós hálók}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+Az eddigiekben általánosságban tárgyaltuk a neruális hálókat, csak annyit állítottunk, hogy a szomszédos rétegek neuronjai vannak egymással kapcsolatan. Általános esetben egy réteg minden neuronja összeköttetésben áll az öt megelőző réteg mindenen neuronjával. Az ilyen réteget teljes-összeköttetésű rétegnek nevezik, a kizárólag ilyeneket tartalmazó hálók pedig sűrű (dense) hálók.
+
+A sűrű hálók sok esetben hatékonyak, azonban például kép inputok esetén a háló nem fogja kihasználni azt, hogy az egymáshoz közeli inputok (például a szomszédos pixelek) valamennyire függenek egymástól. 
+
+A konvolúciós hálók abban különböznek a hagyományos neurális hálóktól, hogy nem teljes-összeköttetésű rétegeket tartalmaznak, hanem egyéb speciális rétegeket:
+
+\begin{itemize}
+  \item Konvolúciós réteg
+  \item Pooling réteg
+\end{itemize}
+
+\subsubsection{Konvolúciós réteg}
+
+A konvolúciós hálók rétegeit elsősorban három dimenziósnak képzeljük el. Színes kép esetén például az input réteg három dimenziója: a kép magassága, szélessége és a pixelek színe. A réteg példában szereplő szín dimenzióját a réteg mélységének nevezzük.
+
+A konvolúciós rétegek $K$ darab szűrőből (filterből) állnak, melyek $n\times n \times d$-s mátrixok, ahol $n$ általában egy kis egész szám, $d$ pedig a filter mélysége.
+
+
+\subsubsection{Pooling réteg}
+
+Pooling
 
 \subsection{Autoencoderek}
 
