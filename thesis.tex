@@ -5,10 +5,6 @@
 
 \begin{document}
 
-
-\section{Bevezetés}
-
-
 \section{Alapok}
 
 \subsection{Neurális hálók}
@@ -112,31 +108,55 @@ Az epoch szám megválasztásánál figyelni kell arra, hogy a hálót ne tanít
 
 \subsection{Konvolúciós hálók}
 
-Az eddigiekben általánosságban tárgyaltuk a neruális hálókat, csak annyit állítottunk, hogy a szomszédos rétegek neuronjai vannak egymással kapcsolatan. Általános esetben egy réteg minden neuronja összeköttetésben áll az öt megelőző réteg mindenen neuronjával. Az ilyen réteget teljes-összeköttetésű rétegnek nevezik, a kizárólag ilyeneket tartalmazó hálók pedig sűrű (dense) hálók.
+A konvolúciós hálókat a legtöbb esetben kép klasszifikációra használják, vagyis háló feladata az, hogy az inputjára kapott képről (egy előre meghatározott listából) elndöntse, hogy  mi szerepel rajta (például: kutya vagy macska). Ha $n$ féle osztályt klasszifikál a háló, akkor $n$ darab output neuronja van, a kép inputra adott válasza pedig egy $n$ elemű eloszlás arról, hogy a háló jelenlegi tudása szerint melyik osztály előfordulását milyen valószínűnek tartja.
 
-A sűrű hálók sok esetben hatékonyak, azonban például kép inputok esetén a háló nem fogja kihasználni azt, hogy az egymáshoz közeli inputok (például a szomszédos pixelek) valamennyire függenek egymástól. 
+A korábbiakban általánosságban tárgyaltuk a neruális hálókat, csak annyit állítottunk, hogy a szomszédos rétegek neuronjai vannak egymással kapcsolatan. Általános esetben egy réteg minden neuronja összeköttetésben áll az őt megelőző réteg mindenen neuronjával. Az ilyen réteget teljes-összeköttetésű rétegnek nevezik, a kizárólag ilyeneket tartalmazó hálók pedig sűrű (dense) hálók.
 
-A konvolúciós hálók abban különböznek a hagyományos neurális hálóktól, hogy nem teljes-összeköttetésű rétegeket tartalmaznak, hanem egyéb speciális rétegeket:
+Kép inputok esetén a sűrű hálók, azonban nem használják ki a képben rejlő azon információt, hogy bizonyos pixelek közelebb vannak egymáshoz mint más pixelek, hiszen az input neuronok szerepe a teljes-összeköttetés miatt felcserélhető. Egy sűrű hálónak ebben az esetben tehát még azt is meg kell tanulnia, hogy mit jelent képnek lenni (összefüggő egyszínű tartományok az egymáshoz közeli pixeleknél, néha éles színváltás).
+
+Ezt a problémát oldják meg a konvolóciós hálók úgy, hogy nem kizálagosan teljes-összeköttetésű rétegeket alkalmaznak, hanem egyéb speciális rétegeket is:
 
 \begin{itemize}
   \item Konvolúciós réteg
   \item Pooling réteg
 \end{itemize}
 
+A konvolúciós hálók általában úgy vannak felépítve, hogy néhány konvolúciós rétegenként tartalmaznak egy pooling réteget, majd a kimeneti réteg - amikor már csak egy 1 dimenziós vektort várunk - egy teljes-összeköttetésű réteg.
+
+A súlyok javítására ugyanúgy a backpropagation algoritmus használjuk.
+
 \subsubsection{Konvolúciós réteg}
 
 A konvolúciós hálók rétegeit elsősorban három dimenziósnak képzeljük el. Színes kép esetén például az input réteg három dimenziója: a kép magassága, szélessége és a pixelek színe. A réteg példában szereplő szín dimenzióját a réteg mélységének nevezzük.
 
-A konvolúciós rétegek $K$ darab szűrőből (filterből) állnak, melyek $n\times n \times d$-s mátrixok, ahol $n$ általában egy kis egész szám, $d$ pedig a filter mélysége.
+A konvolúciós rétegek $K$ darab szűrőből (filterből) állnak, melyek $n\times n$-es súly mátrixok, ahol $n$ általában egy kis egész szám, például 3, paraméter. Maga a réteg pontosan $K$ mélységű, minden filter egy alréteget határoz meg.
 
+A réteg neuronjainak aktivációját a következőképpen számoljuk ki: az előző rétegnek vesszük az összes $n\times n\times d$-s ablakát, ahol $d$ az előző réteg mélységét, az ablak pedig egy neuronokból képezhető téglatestet jelöl, első réteg esetén például a középső $3\times3$ pixelt és színeiket. Minden ilyen ablak $K$ darab neuron aktivációját határozza meg, tehát minden filterhez egyet. A $k$. filter esetén az aktiváció az ablak neuron aktivációinak a filter súlyaival vett lineáris kombinációja lesz. Ezt hívják konvolúciónak.
+
+\begin{figure}[h!]
+\begin{center}
+  \includegraphics[width=0.5\linewidth]{depthcol.jpg}
+  \caption{Egy konvolúciós réteg összes neuronja egy ablak pozícióhoz}
+\end{center}
+\end{figure}
+
+Egy konvolúciós rétegnek vannak egyéb - kevésbé fontos - paraméterei is a filterek száma és az ablakméret mellett, például az hogy az ablak eltolásánál hány neuronnyit lépünk (stride) vagy az ablak viselkedése a neuronmátrix határán (padding).
 
 \subsubsection{Pooling réteg}
 
-Pooling
+Pooling rétegeket általában két konvolúciós réteg között szoktak használni a későbbi rétegek méretének csökkentése céljából. Ez csökkenti a súlyok számát, így gyorsítja a futást, azoban ez a múvelet infromáció veszteséggel jár. Ha a képes analógiát tekintjuk, ez egy veszteséges képméret csökkentésnek felel meg (lásd \ref{pool} ábra). A konvolóciós rétegeknél is (megfelelő padding típussal) csökken a méret, a pooling réteg esetében általában nagyságrendileg felezni szokás a szélességet és magasságot.
+
+\begin{figure}[h!]
+\begin{center}
+  \label{pool}
+  \includegraphics[width=0.5\linewidth]{pool.jpeg}
+  \caption{Egy konvolúciós réteg összes neuronja egy ablak pozícióhoz}
+\end{center}
+\end{figure}
 
 \subsection{Autoencoderek}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+
 
 \subsection{Generatív modellezés}
 
@@ -183,5 +203,15 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nib
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
 
 \subsubsection{Konvolúciós architektúra hatása}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+
+\begin{thebibliography}{9}
+
+\bibitem{ConvNet}
+CS231n Convolutional Neural Networks for Visual Recognition
+http://cs231n.github.io/convolutional-networks/
+
+\end{thebibliography}
 
 \end{document}
