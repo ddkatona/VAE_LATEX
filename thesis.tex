@@ -156,11 +156,33 @@ Pooling rétegeket általában két konvolúciós réteg között szoktak haszn�
 
 \subsection{Autoencoderek}
 
+Az autoencoderek olyan speciális neurális hálók, amelyek képesek az input rétegükre érkező adatot egy rövid kóddá tömöríteni (encode), majd abból a kódból az eredeti inputot visszaállítani (decode). Ezt a két funkciót egyetlen hálóval valósítjuk meg, azonban a hálón belül jól elkülönül a két rész: a rétegek első fele végzi el a kódolást, a második fele pedig a dekódolást. Az encodernek folyamatosan csökkennek, a decodernek pedig növekszenek a rétegeik mérete, ahogy ezt a \ref{AE_arch2} ábra mutatja. Az encode-olás és decode-olás egymás utáni elvégzése elméletben egy identitás. A tanítás során ezért a kimeneten várt érték maga az input, nincs szükségünk adatpárokra, pusztán kódolandó adatokra. A háló tanításásához szükséges hibát tehát a rekonstrukcó hatásfoka fogja meghatározni.
+
+A háló "közepén" elhelyezkedő legkisebb méretű réteget reprezentációs rétegnek nevezzük, a kiértékelés során az itt megjelenő aktivációs értékek vektora jelenti a kódot. Ez a kód valóban az inputra érkező adatot reprezentálja, hiszen az adatból (az encoderrel) elő tudjuk állítani a kódot, a kódból pedig (a decoderrel) vissza tudjuk állítani az adatot.
+
+A \ref{AE_arch2} ábrán látható input egy kép, az MNIST adathalmazból, mely nagy mennyiségű alacsony felbontású képeket tartalmaz rajzolt számjegyekről. Látható, hogy a (már előzőleg betanított) háló kis hibával, de képes rekonstruálni a képet (hiszen a kimenet valóban hasonlít a bemenetre). A kép vektor reprezentációja (kód) a középső két neuronjának aktivációjából olvasható ki. A háló (pontosabban a decoder) tehát képes volt 2 számból előállítani $784$ számot (egy $28\times 28$ pixel méretű képet), vagyis az autoencoderek nem csak kódolásra, hanem tömörítésre is alkalmasak.
+
+
+\begin{figure}[h!]
+\begin{center}
+  \label{AE_arch2}
+  \includegraphics[width=\linewidth]{AE_arch2.png}
+  \caption{Autoencoder}
+\end{center}
+\end{figure}
 
 
 \subsection{Generatív modellezés}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+GAN
+
+\begin{figure}[h!]
+\begin{center}
+  \label{gan_progress}
+  \includegraphics[width=\linewidth]{gan_progress.jpg}
+  \caption{GAN modellek fejlődése az elmúlt 4 évben}
+\end{center}
+\end{figure}
 
 \subsection{Variational autoencoderek (VAE)}
 
