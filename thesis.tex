@@ -158,10 +158,9 @@ Pooling rétegeket általában két konvolúciós réteg között szoktak haszn�
 
 Az autoencoderek olyan speciális neurális hálók, amelyek képesek az input rétegükre érkező adatot egy rövid kóddá tömöríteni (encode), majd abból a kódból az eredeti inputot visszaállítani (decode). Ezt a két funkciót egyetlen hálóval valósítjuk meg, azonban a hálón belül jól elkülönül a két rész: a rétegek első fele végzi el a kódolást, a második fele pedig a dekódolást. Az encodernek folyamatosan csökkennek, a decodernek pedig növekszenek a rétegeik mérete, ahogy ezt a \ref{AE_arch2} ábra mutatja. Az encode-olás és decode-olás egymás utáni elvégzése elméletben egy identitás. A tanítás során ezért a kimeneten várt érték maga az input, nincs szükségünk adatpárokra, pusztán kódolandó adatokra. A háló tanításásához szükséges hibát tehát a rekonstrukcó hatásfoka fogja meghatározni.
 
-A háló "közepén" elhelyezkedő legkisebb méretű réteget reprezentációs rétegnek nevezzük, a kiértékelés során az itt megjelenő aktivációs értékek vektora jelenti a kódot. Ez a kód valóban az inputra érkező adatot reprezentálja, hiszen az adatból (az encoderrel) elő tudjuk állítani a kódot, a kódból pedig (a decoderrel) vissza tudjuk állítani az adatot.
+A háló "közepén" elhelyezkedő legkisebb méretű réteget reprezentációs vagy látens rétegnek nevezzük, a kiértékelés során az itt megjelenő aktivációs értékek vektora jelenti a kódot. Ez a kód valóban az inputra érkező adatot reprezentálja, hiszen az adatból (az encoderrel) elő tudjuk állítani a kódot, a kódból pedig (a decoderrel) vissza tudjuk állítani az adatot.
 
 A \ref{AE_arch2} ábrán látható input egy kép, az MNIST adathalmazból, mely nagy mennyiségű alacsony felbontású képeket tartalmaz rajzolt számjegyekről. Látható, hogy a (már előzőleg betanított) háló kis hibával, de képes rekonstruálni a képet (hiszen a kimenet valóban hasonlít a bemenetre). A kép vektor reprezentációja (kód) a középső két neuronjának aktivációjából olvasható ki. A háló (pontosabban a decoder) tehát képes volt 2 számból előállítani $784$ számot (egy $28\times 28$ pixel méretű képet), vagyis az autoencoderek nem csak kódolásra, hanem tömörítésre is alkalmasak.
-
 
 \begin{figure}[h!]
 \begin{center}
@@ -171,10 +170,35 @@ A \ref{AE_arch2} ábrán látható input egy kép, az MNIST adathalmazból, mely
 \end{center}
 \end{figure}
 
-
 \subsection{Generatív modellezés}
 
-GAN
+A generatív modellezés célja, hogy egy adott (felirat mentes) adathalmazból tanulva új adatokat tudjuk generálni ugyanazon eloszlásból, mint amelyből a tanító adatok származnak. Például ha macskákról készült képekkel tanítjuk a modellt, akkor az képes lesz új, korábban nem látott macskákat tartalmazó képeket generálni.
+
+A gyakorlatban használt két legfőbb generatív modell architektúra:
+\begin{itemize}
+  \item Generative Adversarial Network (GAN)
+  \item Variational AutoEncoder (VAE)
+\end{itemize}
+
+Az eddigi eredmények azt mutatják, hogy a GAN-ok általában jobb eredményeket adnak, mint a VAE-k, azonban a dolgozatban a VAE-ket fogjuk mélyebben vizsgálni, a GAN-ok csak említés szintjén szerepelnek.
+
+\subsubsection{Generative Adversarial Network (GAN)}
+
+A GAN-ok, tehát ahogy korábban már említettük, olyan neurális hálózatok, melyek képesek az input adathalmaz eloszlásából újabb, véletlenszerű adatokat generálni. Ezt - az autoencoderekhez hasonóan - két egymástól funkcionálisan eltérő neurális háló együttes használatával érjük el a GAN esetében. A két hálót \textit{generátornak} és \textit{diszkriminátornak} nevezzük.
+
+A generátor feladata, hogy egy véletlenszerű kódból előállítson egy adatot az adathalmaz eloszlásából. Az háló inputja tehát egy véletlen zaj, azaz minden input neuronnak egy véletlen értéket adunk meg mind tanításkor, mind kiértékeléskor. Már csak annyi a kérdés, hogy hogyan tudjuk eldönteni az output rétegén megjelenő generált adatról, hogy valóban a kívánt adathalmazból származik-e. Ezen eldöntendő kérdés megválaszolására használjuk a diszkriminátort. A generátor súlyait ezért annak függvényében változtatjuk, hogy a diszkriminátor milyen mértékben tartja valódinak az adatot.
+
+A diszkriminátor feladata tehát, hogy egy adatról eldöntse, valóban az adathalmazból származik-e. Az inputja egy adat, az outpuja pedig mindössze két neuronból áll: egy igen és egy nem választ jelző neuronból. A diszkriminátornak felváltva adunk adatokat az adathalmazból és a generátor kimenetéről, mindkét esetben tudjuk, hogy minek kell lennie a várt eredménynek, így idővel megtanulja megkülönböztetni egymástól a valós és generált adatokat. 
+
+A két hálót tehát párhuzamosan tanítjuk, a generátor folyamatosan megtanul adatokat generálni az adathalmaz eloszlásából, a diszkriminátor pedig folyamatosan megtanulja "leleplezni" a generátort. A modell alapvető felépítését a \ref{gan} ábra személteti.
+
+\begin{figure}[h!]
+\begin{center}
+  \label{gan}
+  \includegraphics[width=\linewidth]{gan.png}
+  \caption{Generative Adversarial Network}
+\end{center}
+\end{figure}
 
 \begin{figure}[h!]
 \begin{center}
@@ -184,7 +208,7 @@ GAN
 \end{center}
 \end{figure}
 
-\subsection{Variational autoencoderek (VAE)}
+\subsection{Variational AutoEncoder (VAE)}
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
 
