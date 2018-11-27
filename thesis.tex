@@ -200,6 +200,8 @@ A két hálót tehát párhuzamosan tanítjuk, a generátor folyamatosan megtanu
 \end{center}
 \end{figure}
 
+Az utóbbi néhány évben nagy fejlődésen mentek kereszült a GAN-ok. A \ref{gan_progress} ábrán látható képeket a Celeba adathalmaz (lásd. később) eloszlásából generálták GAN architektúrájú hálókkal. Jól látszik, hogy az elmúlt 5 évben mekkora fejlődésen ment keresztül a szakirány. 
+
 \begin{figure}[h!]
 \begin{center}
   \label{gan_progress}
@@ -210,11 +212,28 @@ A két hálót tehát párhuzamosan tanítjuk, a generátor folyamatosan megtanu
 
 \subsection{Variational AutoEncoder (VAE)}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+A variational autoencoderek a GAN-okhoz hasonlóan generatív modellek, azonban a felépítésük - ahogy a nevüben is szerepel -  nagyban hasonlítanak a hagyományos autoencoderekhez.
+Első ránézésre az autoencoderek is alkalmasnak tűnnek a generálásra, hiszen a decoder komponensük képes egy látens vektorból előállítani egy adatod, ezért ha egy korábban ismeretlen látens vekorra futtatjuk a decodert, akkor egy új, de mégis hiteles adatot kapnánk. Ez azonban nem működik, mert az autoencoder látens terében a gyakorlatban bizonyos térrészek teljesen érintetlenül maradnak, így a háló nincs felkészülve arra, hogy a látens tér azon szegmenséból generáljon (decode-oljon) adatot.
+
+Ezt a probmémát oldja meg a VAE azzal a trükkel, hogy az encodere nem egy konkrét látens vektort állít elő, mint az adat reprezentációs alakja, hanem egy normáls eloszlást. A variational autoencodereknél valójában ez az eloszlás reprezeltálja az adatot, ami két vektort jelent: egy várható érték és szórás vektort, melyek koordinátánként értendőek a látens vektorra nézve. A tanítás során tehát a decoder (amit a VAE esetében már generátornak is nevezhetünk) inputja egy véletlenszerű vektor ebből az eloszlásból (lásd \ref{vae} ábra).
+
+\begin{figure}[h!]
+\begin{center}
+  \label{vae}
+  \includegraphics[width=\linewidth]{vae.jpg}
+  \caption{GAN modellek fejlődése az elmúlt 4 évben}
+\end{center}
+\end{figure}
+
+A VAE-k másik fő eltérése a hagyományos autoencoderektől, hogy a backprogpagarion során nem pusztán a rekonstrukció sikeressége szerint javítják a háló súlyait, hanem az KL (Kullback–Leibler) divergencia függvényében is. A KL divergencia nem a kimeneten kapott adatot minősíti, hanem azt, hogy a létrejött eloszlások hogyan helyezkednek el a látens térben. Röviden: az olyan eloszlás halmazokat jutalmazza, amelyek egyenletesen fedik le a látens teret. A tanítás során ezért az adathalmaz adataihoz párosítható látens reprezentációk az egész teret lefedik.
+
+A tanítás végeztével tehát a látens térből bárhonnan választhatunk véletlen vektorokat, azokból valósághű adatotokat fog generálni a decoder.
 
 \subsection{Módosított variational autoencoderek ($\beta$VAE)}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+A $\beta$VAE-k nagyon hasonlóak a rendes VAE hálókhoz, mindössze a loss functionben különböznek egymástól. A VAE-k esetében ez a veszteség két komponensből áll: a rekonstrukciós veszteségből és a KL divergenciából. A $\beta$VAE-ben szereplő béta minössze egy konstanst jelent, amely azt határozza meg, hogy a teljes veszteség kiszámításnál a két komponenst milyen súllyal számoljuk, egészen konkrétan a rekonstrukciós veszteségnek mindig $1$, a KL divergenciának pedig $\beta$ a súlya. A rendes VAE hálók tehát valójában $\beta=1$ paraméterű $\beta$VAE-k.
+
+A gyakorlati tapasztalat azt mutatja, hogy az $1$-től eltérő $\beta$-k sok esetben javítanak az eredményeken.
 
 \section{Implementáció}
 
