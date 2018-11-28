@@ -1,11 +1,15 @@
 \documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
+\usepackage{array}  
+\usepackage{listings}
 \renewcommand{\figurename}{Ábra.}
 
 \begin{document}
 
+
 \section{Alapok}
+
 
 \subsection{Neurális hálók}
 
@@ -210,7 +214,7 @@ Az utóbbi néhány évben nagy fejlődésen mentek kereszült a GAN-ok. A \ref{
 \end{center}
 \end{figure}
 
-\subsection{Variational AutoEncoder (VAE)}
+\subsection{Variational Autoencoder (VAE)}
 
 A variational autoencoderek a GAN-okhoz hasonlóan generatív modellek, azonban a felépítésük - ahogy a nevüben is szerepel -  nagyban hasonlítanak a hagyományos autoencoderekhez.
 Első ránézésre az autoencoderek is alkalmasnak tűnnek a generálásra, hiszen a decoder komponensük képes egy látens vektorból előállítani egy adatod, ezért ha egy korábban ismeretlen látens vekorra futtatjuk a decodert, akkor egy új, de mégis hiteles adatot kapnánk. Ez azonban nem működik, mert az autoencoder látens terében a gyakorlatban bizonyos térrészek teljesen érintetlenül maradnak, így a háló nincs felkészülve arra, hogy a látens tér azon szegmenséból generáljon (decode-oljon) adatot.
@@ -237,45 +241,115 @@ A gyakorlati tapasztalat azt mutatja, hogy az $1$-től eltérő $\beta$-k sok es
 
 \section{Implementáció}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+A dolgozatban különböző VAE implementációkat tesztelünk. Megvizsgáljuk, hogy a háló különböző paramétereinek változtatása milyen hatással van a rekonstrukcióra, továbbá megvizsgáljuk, hogy az adatok különböző attribútumai (lásd Dsprite adathalmaz fejezet), hogyan képződnek le a látens térbe.
 
 \subsection{Az alkalmazott szoftverarchitektúra ismertetése}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+A matemaikai és egyéb kutatási irányok esetén többnyire a Python programnyelvet szokás használni, így van ez a neurális hálóknál is. Gyakorlati alkalmazás (például egy Androidos arcfelismerő) esetén természetesen már más nyelveket is szoktak használni, a mi programunknak azonban nincsen semmilyen közvetlen gyakorlati haszna, pusztán kutatási célokat szolgál.
 
-\subsection{Dsprite és Celeba adathalmazok}
+A szoftverünkben felhasznált neurális hálókat kezelő könyvtárak a TensorFlow és a Keras, melyek nem egymástól függetlenül, hanem egymás segítve működnek. Ezek egyszerű, magasszintű hozzáférést biztosítanak a hálókhoz, ezért nem kell külön megírni például a backprogpagation algoritmust, csak meghívni az alábbi metódust:
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+\lstset{language=Python}
+\begin{lstlisting}
+model.fit(train_data,train_data)
+\end{lstlisting}
+
+Természetesen megadható számos paraméter a tanító adatpárokon kívül, például a epoch szám, vagy a batchek mérete. Észrevehetjük, hogy a fenti függvényhívás mindkét paramétere a tanító halmaz. Ennek az a magyarázata, hogy a hálónk egy (variational) autoencoder, tehát a tanítás célja a rekonstrukció, azaz akkor tekintjük az eredményt a legjobbnak, ha a kimeneten ugyanazt látjuk mint a bemeneten. Egy klasszifikáló háló esetében például az első paraméter az adatok, a második pedig a hozzátartozó címkék lennének.
+
+A keretrendszer úgy van kialakítva, hogy a hálók alapvető paramétereit (epoch szám, batch méret, látens tér mérete, $\dots$) a programkód változtatása nélkül, egy külön (.ini kiterjesztésű) fájlból változtathatjuk. Egészen konkrétan a program kiinduló pontját jelentő generative.py programot egyetlen argumentummal, egy .ini fájlhoz vezető úttal kell meghívni. Alább látható egy példa egy adott paraméterezésű háló betanítására:
+
+\lstset{language=sh}
+\begin{lstlisting}
+python generative.py vae.ini
+\end{lstlisting}
+
+Itt tehát a vae.ini fájl minden információt tartalmaz a tanítandó hálóról, az adathalmaz is linkelve van benne. Egy ilyen paraméter fájl ezért pontosan leír egy kísérletet, utólag is megtekinthető (készül róla egy másolat is, ami a betanított háló fájljai mellé kerül).
+
+\subsection{Dsprite adathalmaz}
+
+A kísérletekhez használt adatokat a Dsprite adathalmazból vesszük, mely a GitHubon szabadon elérhető, letölthető.
+
+Az Dsprite egy úgynevezett szintetikus adathalmaz, ami azt jelenti, hogy az adatai nem a valóságból származnak, hanem külön erre a célra lettek legenerálva egy másik programmal. Maguk az adatok egészen pontosan $64\times64$ pixel felbontású képek, melyeken külöböző alakzatok sokféle elforgatásban, eltolásban és méretben szerepelnek. Az adathalmaz továbbá címkézve is van, tehát minden képhez tartozik a rajta szereplő alakzat pontos leírása, egészen konkrétan:
+
+\begin{itemize}
+  \item típus: az alakzat formája ($3$ féle lehet: négyzet, ellipszis, szív)
+  \item méret: az alakzat mérete ($6$ féle lehet)
+  \item orientáció: az alakzat elforgatottságának mértéke ($40$ féle lehet)
+  \item pozíció: az alakzat elhelyezkedése x és y irányban ($32\times32$ féle lehet)
+\end{itemize}
+
+A Dsprite ezen attribútumok összes lehetséges kombinációját tartalmazza, tehát az adathalmaz pontosan
+$$ 3\cdot6\cdot40\cdot32\cdot32= 737280$$
+darab adatot tartalmaz. A \ref{samples} táblázatban látható néhány minta az adatok közül.
+
+\begin{figure}[h!]
+\begin{center}
+\label{samples}
+\begin{tabular}{| m{2.5cm} | m{2.5cm} | m{2cm}  | m{2cm} |  m{2.5cm} |}
+\hline
+Kép/Adat & Alak & Méret & Orientáció & Pozíció $(x,y)$ \\
+\hline\hline
+\includegraphics{sample00000.png} & $1$ (Négyzet) & $1$ & $1$ & $(1,1)$ \\
+\hline
+\includegraphics{sample0051616.png} & $1$ (Négyzet) & $1$ & $6$ & $(17,17)$ \\
+\hline
+\includegraphics{sample1001616.png} & $2$ (Ellipszis) & $1$ & $1$ & $(17,17)$ \\
+\hline
+\includegraphics{sample1501616.png} & $2$ (Ellipszis) & $6$ & $1$ & $(17,17)$ \\
+\hline
+\includegraphics{sample2003131.png} & $3$ (Szív) & $1$ & $1$ & $(32,32)$ \\
+\hline
+\end{tabular}
+\end{center}
+\caption{GAN modellek fejlődése az elmúlt 4 évben}
+\end{figure}
+
+Ezen a ponton felmerülhet a kérdés, hogy miért foglalkozunk azzal, hogy az adatok mellé milyen extra informácó (címke) párosul az adathalmazban, amikor korábban már láttuk, hogy az autoencoderek és VAE-k esetén pusztán a címkézetlen adatokat használjuk. Valóban, sem a hálók tanításhoz, sem a kiértékelésükhöz nem fogjuk használni ezeket a csatolt tulajdonságokat, azonban nem állunk meg azon a ponton ahol a VAE. A dolgozatban nem csupán adatokat generálunk a megadott adahalmaz eloszlásából, hanem szeretnénk megérteni a létrejött látens teret.
 
 \subsection{Látens reprezentációk strukturáltságának számszerűsítése}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+
 
 \subsection{Vizualizációs eszközök ismertetése}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+
 
 \subsection{Kísérletek}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+
 
 \subsubsection{Tanulási idő hatása}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+
 
 \subsubsection{$\beta$ hiperparaméter hatása}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
+
 
 \subsubsection{Konvolúciós architektúra hatása}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at risus quis nibh dignissim venenatis at id lacus. Aenean cursus erat quis magna tempus, sed ultricies est dictum. Donec sed nisl in ante vestibulum hendrerit a id velit. Phasellus vel erat elit. Morbi eu lobortis sem. Pellentesque at nunc et nibh fringilla mattis eu a diam. Cras mollis convallis vestibulum. Donec at mattis est. Duis cursus enim lorem, eu lobortis ante luctus id. Nullam pellentesque convallis quam. Vestibulum laoreet, dolor sed finibus pulvinar, ante felis convallis lorem, quis pulvinar orci ante at ipsum. Etiam facilisis tincidunt tincidunt. Nunc ipsum purus, egestas eu imperdiet vitae, posuere ut odio. Curabitur consectetur ante quis erat venenatis, eget consectetur mauris viverra.
 
 \begin{thebibliography}{9}
 
 \bibitem{ConvNet}
-CS231n Convolutional Neural Networks for Visual Recognition
+CS231n Convolutional Neural Networks for Visual Recognition:
 http://cs231n.github.io/convolutional-networks/
+
+\bibitem{Dsprite}
+@misc{dsprites17,
+author = {Loic Matthey and Irina Higgins and Demis Hassabis and Alexander Lerchner},
+title = {dSprites: Disentanglement testing Sprites dataset},
+howpublished= {https://github.com/deepmind/dsprites-dataset/},
+year = "2017",
+}
+
+\bibitem{Dsprite}
+Variational Autoencoders Explained
+http://kvfrans.com/variational-autoencoders-explained/
+
+\bibitem{Dsprite}
+Keras:
+https://keras.io/
 
 \end{thebibliography}
 
