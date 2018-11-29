@@ -2,9 +2,49 @@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{array}  
-\usepackage{listings}
+%\usepackage{listings}
 \renewcommand{\figurename}{Ábra.}
+% Default fixed font does not support bold face
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{12} % for bold
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{12}  % for normal
 
+% Custom colors
+\usepackage{color}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+
+\usepackage{listings}
+
+% Python style for highlighting
+\newcommand\pythonstyle{\lstset{
+language=Python,
+basicstyle=\ttm,
+otherkeywords={self},             % Add keywords here
+keywordstyle=\ttb\color{deepblue},
+emph={MyClass,__init__},          % Custom highlighting
+emphstyle=\ttb\color{deepred},    % Custom highlighting style
+stringstyle=\color{deepgreen},
+frame=tb,                         % Any extra options here
+showstringspaces=false            % 
+}}
+
+
+% Python environment
+\lstnewenvironment{python}[1][]
+{
+\pythonstyle
+\lstset{#1}
+}
+{}
+
+% Python for external files
+\newcommand\pythonexternal[2][]{{
+\pythonstyle
+\lstinputlisting[#1]{#2}}}
+
+% Python for inline
+\newcommand\pythoninline[1]{{\pythonstyle\lstinline!#1!}}
 \begin{document}
 
 
@@ -249,21 +289,89 @@ A matemaikai és egyéb kutatási irányok esetén többnyire a Python programny
 
 A szoftverünkben felhasznált neurális hálókat kezelő könyvtárak a TensorFlow és a Keras, melyek nem egymástól függetlenül, hanem egymás segítve működnek. Ezek egyszerű, magasszintű hozzáférést biztosítanak a hálókhoz, ezért nem kell külön megírni például a backprogpagation algoritmust, csak meghívni az alábbi metódust:
 
-\lstset{language=Python}
-\begin{lstlisting}
+%\lstset{language=Python}
+\begin{python}
 model.fit(train_data,train_data)
-\end{lstlisting}
+\end{python}
 
 Természetesen megadható számos paraméter a tanító adatpárokon kívül, például a epoch szám, vagy a batchek mérete. Észrevehetjük, hogy a fenti függvényhívás mindkét paramétere a tanító halmaz. Ennek az a magyarázata, hogy a hálónk egy (variational) autoencoder, tehát a tanítás célja a rekonstrukció, azaz akkor tekintjük az eredményt a legjobbnak, ha a kimeneten ugyanazt látjuk mint a bemeneten. Egy klasszifikáló háló esetében például az első paraméter az adatok, a második pedig a hozzátartozó címkék lennének.
 
 A keretrendszer úgy van kialakítva, hogy a hálók alapvető paramétereit (epoch szám, batch méret, látens tér mérete, $\dots$) a programkód változtatása nélkül, egy külön (.ini kiterjesztésű) fájlból változtathatjuk. Egészen konkrétan a program kiinduló pontját jelentő generative.py programot egyetlen argumentummal, egy .ini fájlhoz vezető úttal kell meghívni. Alább látható egy példa egy adott paraméterezésű háló betanítására:
 
-\lstset{language=sh}
-\begin{lstlisting}
-python generative.py vae.ini
-\end{lstlisting}
 
-Itt tehát a vae.ini fájl minden információt tartalmaz a tanítandó hálóról, az adathalmaz is linkelve van benne. Egy ilyen paraméter fájl ezért pontosan leír egy kísérletet, utólag is megtekinthető (készül róla egy másolat is, ami a betanított háló fájljai mellé kerül).
+\lstset{language=sh}
+\begin{python}
+python generative.py vae.ini
+\end{python}
+
+Itt tehát a vae.ini fájl minden információt tartalmaz a tanítandó hálóról, az adathalmaz is linkelve van benne. Egy ilyen paraméter fájl ezért pontosan leír egy kísérletet, utólag is megtekinthető (készül róla egy másolat is, ami a betanított háló fájljai mellé kerül). Itt látható példa egy kísérletre (.ini fájlra):
+
+\begin{python}
+activation	relu
+batch_size	50
+color	False
+dataset	dsprite
+encoder	conv_deconv
+encoder_conv_channels   32,32,32
+encoder_use_bn	False
+encoder_wd	0.0
+frequency	2
+generator	conv_deconv
+generator_conv_channels   32,32,32
+generator_use_bn	False
+generator_wd	0.0
+ini_file	[]
+latent_dim	10
+loss_generator  mse_loss
+loss_encoder    size_loss,variance_loss
+lr	0.0003
+memory_share	0.45
+metrics	mse_loss
+model_type	autoencoder
+nb_epoch	15
+optimizer	adam
+outdir	pictures/beta_vae_tuned
+sampling	True
+shape	64,64
+testSize	10000
+trainSize	727200
+verbose	2
+weight_schedules size_loss|1|1|0|1,variance_loss|1|1|0|1
+\end{python}
+
+A tanítás végeztével az eredmények a keretrendszer működése szerint az .ini fájlban megadott \pythoninline{outputdir} mappába kerülnek (a fenti példában \pythoninline{pictures/beta_vae_tuned}). Ebben a directoryban a program eltárol egy "biztonsági" másolatot (\pythoninline{all_params.ini}) a .ini fájlról, hogy a futtatás után is láthassuk, milyen hálót tanítottunk. Eltáródik továbbá magának a hálónak az architektúrája az \pythoninline{encoder.json} és \pythoninline{generator.json} fájlokban (közvetlenúl ezt használja a program egy háló beolvasásához). Természetesen azt is el kell menteni, hogy mi lett a tanítás eredménye, vagyis a háló éleinek végeles súlyait. Ezeket a \pythoninline{encoder.h5} és \pythoninline{generator.h5} fájlokban tároljuk el. A háló utólagos kiértékelése/korábban ismeretlen adatokra futtatása esetén a program ezekből a fájlokból olvassa be és építi fel a hálót.
+
+Ezeken az alapvetően szükséges fájlokon kívül a mi programunk kiment egyéb - a tanítás hatékonyságát szemléltető - kép fájlokat is. Ez néhány epochonként történik meg.
+
+Az egyik ilyen fájl a \pythoninline{train_<epoch>.png}, amely néhány véletlenszerűen kiválasztott input/output párt rajzol ki az adott epochban. Egy ilyen kép látható a \ref{trainpng} ábrán (párosával vannak: bal oldalon az input, jobb oldalon az output).
+
+\begin{figure}[h!]
+\begin{center}
+  \label{trainpng}
+  \includegraphics[width=\linewidth]{trainpng.png}
+  \caption{Input/Output párok a tanítás során}
+\end{center}
+\end{figure}
+
+A \pythoninline{test_<epoch>.png} kép nagyban hasonlít a \pythoninline{train_<epoch>.png}-hez, azonban itt csak a tesztelési adatokra adott kiemeneteket nézzük, tehát a \ref{testpng} ábrán látható adatokat nem tanítottuk meg a hálónak. Egy autoencoder esetében természetesen az elvárás éppen az, hogy olyan adatokra is képes legyen rekonstruálni, melyet korábban nem látott.
+
+ \begin{figure}[h!]
+\begin{center}
+  \label{testpng}
+  \includegraphics[width=\linewidth]{testpng.png}
+  \caption{Input/Output párok a tesztelés során}
+\end{center}
+\end{figure}
+
+Az iménti két képen a háló autoencoder jellegét validálhattuk szemrevételezéssel, azonban a mi hálónk egy VAE, tehát a betanítás után képes újabb képeket generálni anélkül, hogy egy input adatot adnánk neki. Ilyen, véletlen látens vektorokból generált képeket tárolunk el a \pythoninline{random_<epoch>.png} fájlban (lásd \ref{randompng} ábra). Ezen a képen már nem párokban vannak az adatok, minden szegmens egy különböző látens vektorhoz tartozik.
+
+\begin{figure}[h!]
+\begin{center}
+  \label{randompng}
+  \includegraphics[width=\linewidth]{randompng.png}
+  \caption{Véletlenszerű látens vektorokból generált képek}
+\end{center}
+\end{figure}
 
 \subsection{Dsprite adathalmaz}
 
@@ -308,7 +416,7 @@ Ezen a ponton felmerülhet a kérdés, hogy miért foglalkozunk azzal, hogy az a
 
 \subsection{Látens reprezentációk strukturáltságának számszerűsítése}
 
-
+A 
 
 \subsection{Vizualizációs eszközök ismertetése}
 
@@ -323,6 +431,10 @@ Ezen a ponton felmerülhet a kérdés, hogy miért foglalkozunk azzal, hogy az a
 
 
 \subsubsection{$\beta$ hiperparaméter hatása}
+
+
+
+\subsubsection{Látens tér dimenziójának hatása}
 
 
 
