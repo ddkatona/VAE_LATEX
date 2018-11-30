@@ -48,6 +48,8 @@ showstringspaces=false            %
 \begin{document}
 
 
+\section{Bevezetés}
+
 \section{Alapok}
 
 
@@ -279,9 +281,54 @@ A $\beta$VAE-k nagyon hasonlóak a rendes VAE hálókhoz, mindössze a loss func
 
 A gyakorlati tapasztalat azt mutatja, hogy az $1$-től eltérő $\beta$-k sok esetben javítanak az eredményeken.
 
-\section{Implementáció}
+\section{Feladat}
 
-A dolgozatban különböző VAE implementációkat tesztelünk. Megvizsgáljuk, hogy a háló különböző paramétereinek változtatása milyen hatással van a rekonstrukcióra, továbbá megvizsgáljuk, hogy az adatok különböző attribútumai (lásd Dsprite adathalmaz fejezet), hogyan képződnek le a látens térbe.
+A dolgozatban különböző VAE implementációkat tesztelünk egy bizonyos Dsprite adathalmazon (lásd később). Megvizsgáljuk, hogy a háló különböző paramétereinek változtatása, mint például (learning rate, látens tér dimenziója, béta hiperparaméte) milyen hatással van a loss functionökre és a rekonstrukcióra.
+
+Továbbá megnézzük azt is, hogy az adathalmazon elvégzett transzformációk (például a képen lévő alakzat eltolása, forgatása) hogyan képződnek le a látens térbe. Ugyanis, ha tudjuk a látenstérben és az adathalmazon vett transzformációk egymáshoz való viszonyát, akkor képesek vagyunk kondicionálisan is adatot generálni. Ez azt jelenti, hogy nem csak véletlen adatokat tudunk generálni a VAE hálóval, hanem generálandó adat bizonyos tulajdonságait explicit meg tudjuk adni a generáláskor (például, hogy hol helyezkedjen el a képen belül az alakzat).
+
+\subsection{Dsprite adathalmaz}
+
+A kísérletekhez használt adatokat a Dsprite adathalmazból vesszük, mely a GitHubon szabadon elérhető, letölthető.
+
+Az Dsprite egy úgynevezett szintetikus adathalmaz, ami azt jelenti, hogy az adatai nem a valóságból származnak, hanem külön erre a célra lettek legenerálva egy másik programmal. Maguk az adatok egészen pontosan $64\times64$ pixel felbontású képek, melyeken külöböző alakzatok sokféle elforgatásban, eltolásban és méretben szerepelnek. Az adathalmaz továbbá címkézve is van, tehát minden képhez tartozik a rajta szereplő alakzat pontos leírása, egészen konkrétan:
+
+\begin{itemize}
+  \item típus: az alakzat formája ($3$ féle lehet: négyzet, ellipszis, szív)
+  \item méret: az alakzat mérete ($6$ féle lehet)
+  \item orientáció: az alakzat elforgatottságának mértéke ($40$ féle lehet)
+  \item pozíció: az alakzat elhelyezkedése x és y irányban ($32\times32$ féle lehet)
+\end{itemize}
+
+A Dsprite ezen attribútumok összes lehetséges kombinációját tartalmazza, tehát az adathalmaz pontosan
+$$ 3\cdot6\cdot40\cdot32\cdot32= 737280$$
+darab adatot tartalmaz. A \ref{samples} táblázatban látható néhány minta az adatok közül.
+
+\begin{figure}[h!]
+\begin{center}
+\label{samples}
+\begin{tabular}{| m{2.5cm} | m{2.5cm} | m{2cm}  | m{2cm} |  m{2.5cm} |}
+\hline
+Kép/Adat & Alak & Méret & Orientáció & Pozíció $(x,y)$ \\
+\hline\hline
+\includegraphics{sample00000.png} & $1$ (Négyzet) & $1$ & $1$ & $(1,1)$ \\
+\hline
+\includegraphics{sample0051616.png} & $1$ (Négyzet) & $1$ & $6$ & $(17,17)$ \\
+\hline
+\includegraphics{sample1001616.png} & $2$ (Ellipszis) & $1$ & $1$ & $(17,17)$ \\
+\hline
+\includegraphics{sample1501616.png} & $2$ (Ellipszis) & $6$ & $1$ & $(17,17)$ \\
+\hline
+\includegraphics{sample2003131.png} & $3$ (Szív) & $1$ & $1$ & $(32,32)$ \\
+\hline
+\end{tabular}
+\end{center}
+\caption{GAN modellek fejlődése az elmúlt 4 évben}
+\end{figure}
+
+Ezen a ponton felmerülhet a kérdés, hogy miért foglalkozunk azzal, hogy az adatok mellé milyen extra informácó (címke) párosul az adathalmazban, amikor korábban már láttuk, hogy az autoencoderek és VAE-k esetén pusztán a címkézetlen adatokat használjuk. Valóban, sem a hálók tanításhoz, sem a kiértékelésükhöz nem fogjuk használni ezeket a csatolt tulajdonságokat, azonban nem állunk meg azon a ponton ahol a VAE. A dolgozatban nem csupán adatokat generálunk a megadott adahalmaz eloszlásából, hanem szeretnénk megérteni a létrejött látens teret.
+
+\section{Megvalósítás}
 
 \subsection{Az alkalmazott szoftverarchitektúra ismertetése}
 
@@ -373,54 +420,37 @@ Az iménti két képen a háló autoencoder jellegét validálhattuk szemrevéte
 \end{center}
 \end{figure}
 
-\subsection{Dsprite adathalmaz}
-
-A kísérletekhez használt adatokat a Dsprite adathalmazból vesszük, mely a GitHubon szabadon elérhető, letölthető.
-
-Az Dsprite egy úgynevezett szintetikus adathalmaz, ami azt jelenti, hogy az adatai nem a valóságból származnak, hanem külön erre a célra lettek legenerálva egy másik programmal. Maguk az adatok egészen pontosan $64\times64$ pixel felbontású képek, melyeken külöböző alakzatok sokféle elforgatásban, eltolásban és méretben szerepelnek. Az adathalmaz továbbá címkézve is van, tehát minden képhez tartozik a rajta szereplő alakzat pontos leírása, egészen konkrétan:
-
-\begin{itemize}
-  \item típus: az alakzat formája ($3$ féle lehet: négyzet, ellipszis, szív)
-  \item méret: az alakzat mérete ($6$ féle lehet)
-  \item orientáció: az alakzat elforgatottságának mértéke ($40$ féle lehet)
-  \item pozíció: az alakzat elhelyezkedése x és y irányban ($32\times32$ féle lehet)
-\end{itemize}
-
-A Dsprite ezen attribútumok összes lehetséges kombinációját tartalmazza, tehát az adathalmaz pontosan
-$$ 3\cdot6\cdot40\cdot32\cdot32= 737280$$
-darab adatot tartalmaz. A \ref{samples} táblázatban látható néhány minta az adatok közül.
-
-\begin{figure}[h!]
-\begin{center}
-\label{samples}
-\begin{tabular}{| m{2.5cm} | m{2.5cm} | m{2cm}  | m{2cm} |  m{2.5cm} |}
-\hline
-Kép/Adat & Alak & Méret & Orientáció & Pozíció $(x,y)$ \\
-\hline\hline
-\includegraphics{sample00000.png} & $1$ (Négyzet) & $1$ & $1$ & $(1,1)$ \\
-\hline
-\includegraphics{sample0051616.png} & $1$ (Négyzet) & $1$ & $6$ & $(17,17)$ \\
-\hline
-\includegraphics{sample1001616.png} & $2$ (Ellipszis) & $1$ & $1$ & $(17,17)$ \\
-\hline
-\includegraphics{sample1501616.png} & $2$ (Ellipszis) & $6$ & $1$ & $(17,17)$ \\
-\hline
-\includegraphics{sample2003131.png} & $3$ (Szív) & $1$ & $1$ & $(32,32)$ \\
-\hline
-\end{tabular}
-\end{center}
-\caption{GAN modellek fejlődése az elmúlt 4 évben}
-\end{figure}
-
-Ezen a ponton felmerülhet a kérdés, hogy miért foglalkozunk azzal, hogy az adatok mellé milyen extra informácó (címke) párosul az adathalmazban, amikor korábban már láttuk, hogy az autoencoderek és VAE-k esetén pusztán a címkézetlen adatokat használjuk. Valóban, sem a hálók tanításhoz, sem a kiértékelésükhöz nem fogjuk használni ezeket a csatolt tulajdonságokat, azonban nem állunk meg azon a ponton ahol a VAE. A dolgozatban nem csupán adatokat generálunk a megadott adahalmaz eloszlásából, hanem szeretnénk megérteni a létrejött látens teret.
-
 \subsection{Látens reprezentációk strukturáltságának számszerűsítése}
 
-A 
+Egy variational autoencoderrel, amivel dolgozunk képesek vagyunk az input adathalmaz eloszlásából véletlen adatokat generálni. Ez a VAE hálók rendeltetés szerű működése. A mi célunk az, hogy az alakzatokon végzett transzformációk a látens térben is strukturált módon megjelenjenek.
+
+Ezen a ponton használjuk fel az adathalmaz címkéit, tehát hogy valójában minden képhez ismerjük a rajta szereplő alakzat teljes transzforációját (pozíció, méret, forgatás). Az adathalmazból így ki tudjuk keresni az összes olyan képet, melyen egy alakzat, egy forgatásban és egy méretben szerepel, vagyis annak az alakzatnak az összes eltolását. Ezt összesen $32\times32$ adatból álló képhalmazt nevezzük $Q$-nak. A következőkben azt vizsgáljuk, hogy azon vektorok a látens térben, melyekből ezek a képek generálódnak, hogy helyezkednek el. Ez pedig, ha a genrátor jól működik, akkor ekvivalens azzal, hogy hol helyezkednek el azok a vektorok, melyeket az encoder előállít a képekből.
+
+Az alakzatok összes lehetséges eltolását két egymástól független paraméterrel le tudjuk írni: az $x$ és $y$ pozíciókkal. Azt szeretnénk látni, hogy a látens térben is leírhatóak két koordinátával, méghozzá egy az adahalmazhoz hasonló négyzetrácsot alkotnak a látens vektorok is. Az ideális természetesen az lenne, ha a látensvektor $1-1$ koordinátája egy az egyben megfeleltethető lenne $x$-nek és $y$-nak, azonban ezt nehéz feladat kikényszeríteni. Csak annyit valósítunk meg, hogy a $Q$ halmaz egy 2 dimenziós négyzetrácsra képződjön le a látens térbe. 
+
+Annak számszerűsítésére, hogy a látens ponthalmaz mennyire áll közel egy négyzetrácshoz két metrikát is használunk:
+\begin{itemize}
+  \item PCA metrika
+  \item Átlagos szög metrika
+\end{itemize}
+
+\subsubsection{PCA metrika}
+
+Abból indulunk ki, hogy egy négyzetrács alapvető feltétele, hogy az azonos koordinátájú ponjai egyenest alkotnak. A metrika valójában ezen pontvektorok egyenességét méri, és ezek átlaga lesz a négyzetrácsra vonatkozó általános metrika.
+
+A PCA (Principal component analysis) procedurával (mely a sklearn Python modulban elérhető) egy pontvektort levetítünk egy 1 dimenziós egyesre, úgy hogy a vetítéssel járó információ (százalékos) $l$ veszteség minimális legyen. Ha ennek az ellentétét vesszük tehát $1-l$ mennyiséget, az azt mutatja, hogy a vetítést megelőző és azt követő ponthalmaz százalékosan mennyire hasonlít egymásra. Ez ez lesz a metrikánk az egyenesekre nézve. Ha például már a teljes pontvektor egyenezt alkot a látens térben is, akkor a metrika 1 lesz.
+
+A négyzetrácsra vonatkozó metrika ezen egyenesek metrikáinak átlaga lesz, ahol az $x$ és $y$ orientációjú egyeneseket nem különböztetjük meg az átlagolás szemponjából.
+
+\subsubsection{Átlagos szög metrika}
+
+A PCA metrikához hasonlóan ezen metrika esetében is az négyzetrácsot alkotó egyeneseknek egyenes mivoltát mérjük. Az átlagos szög metrikánál egyszerűen vonalt alkotó szakaszok által bezárt szögek átlaga lesz az egyenest jellemző mérőszám. 
+
+Az általános, négyzetrácsot leíró metrika pedig a PCA-hoz hasonlóan az egyenes metrikák átlaga lesz.
 
 \subsection{Vizualizációs eszközök ismertetése}
 
-
+Elsősorban a Matplotlib nevű Python könyvtárat használjuk a grafikonok rajzolásához.
 
 \subsection{Kísérletek}
 
