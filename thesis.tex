@@ -432,11 +432,15 @@ Annak számszerűsítésére, hogy a látens ponthalmaz mennyire áll közel egy
 \begin{itemize}
   \item PCA metrika
   \item Átlagos szög metrika
+  \item Párhuzamosság metrika
 \end{itemize}
 
 \subsubsection{PCA metrika}
 
-Abból indulunk ki, hogy egy négyzetrács alapvető feltétele, hogy az azonos koordinátájú ponjai egyenest alkotnak. A metrika valójában ezen pontvektorok egyenességét méri, és ezek átlaga lesz a négyzetrácsra vonatkozó általános metrika.
+Abból indulunk ki, hogy egy négyzetrács alapvető feltétele, hogy az
+azonos koordinátájú ponjai egyenest alkotnak. A metrika valójában ezen
+pontvektorok egyenességét méri, és ezek átlaga lesz a négyzetrácsra
+vonatkozó általános metrika.
 
 A PCA (Principal component analysis) procedurával (mely a sklearn Python modulban elérhető) egy pontvektort levetítünk egy 1 dimenziós egyesre, úgy hogy a vetítéssel járó információ (százalékos) $l$ veszteség minimális legyen. Ha ennek az ellentétét vesszük tehát $1-l$ mennyiséget, az azt mutatja, hogy a vetítést megelőző és azt követő ponthalmaz százalékosan mennyire hasonlít egymásra. Ez ez lesz a metrikánk az egyenesekre nézve. Ha például már a teljes pontvektor egyenezt alkot a látens térben is, akkor a metrika 1 lesz.
 
@@ -447,6 +451,10 @@ A négyzetrácsra vonatkozó metrika ezen egyenesek metrikáinak átlaga lesz, a
 A PCA metrikához hasonlóan ezen metrika esetében is az négyzetrácsot alkotó egyeneseknek egyenes mivoltát mérjük. Az átlagos szög metrikánál egyszerűen vonalt alkotó szakaszok által bezárt szögek átlaga lesz az egyenest jellemző mérőszám. 
 
 Az általános, négyzetrácsot leíró metrika pedig a PCA-hoz hasonlóan az egyenes metrikák átlaga lesz.
+
+\subsubsection{Párhuzamosság metrika}
+
+Ennél a metrikánál azt számoljuk ki, hogy a vonalak mennyire párhuzamosak egymással.
 
 \subsection{Vizualizációs eszközök ismertetése}
 
