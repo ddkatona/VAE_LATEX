@@ -395,7 +395,7 @@ Az egyik ilyen fájl a \pythoninline{train_<epoch>.png}, amely néhány véletle
 \begin{figure}[h!]
 \begin{center}
   \label{trainpng}
-  \includegraphics[width=\linewidth]{trainpng.png}
+  \includegraphics[width=0.75\linewidth]{trainpng.png}
   \caption{Input/Output párok a tanítás során}
 \end{center}
 \end{figure}
@@ -405,7 +405,7 @@ A \pythoninline{test_<epoch>.png} kép nagyban hasonlít a \pythoninline{train_<
  \begin{figure}[h!]
 \begin{center}
   \label{testpng}
-  \includegraphics[width=\linewidth]{testpng.png}
+  \includegraphics[width=0.75\linewidth]{testpng.png}
   \caption{Input/Output párok a tesztelés során}
 \end{center}
 \end{figure}
@@ -415,10 +415,14 @@ Az iménti két képen a háló autoencoder jellegét validálhattuk szemrevéte
 \begin{figure}[h!]
 \begin{center}
   \label{randompng}
-  \includegraphics[width=\linewidth]{randompng.png}
+  \includegraphics[width=0.75\linewidth]{randompng.png}
   \caption{Véletlenszerű látens vektorokból generált képek}
 \end{center}
 \end{figure}
+
+\subsubsection{Futásidő}
+
+A neurális hálók tanítás általánosságban véve egy lassú folyamat, azonban (a batchek használata miatt) lehetőség nyílik nagymértékű párhuzamosításra, ezért a legtöbb esetben grafikus kártyákat használnak erre a célra. A dolgozatban prezentált hálókat is mind GPU-kon, Nvidia GTX 1080 Ti kártyákon tanítottam, melyekhez az MTA Rényi Alfréd Matematikai Kutatóintézet biztosított hozzáférést. Ezek jelenleg a legnagyobb teljesítményű kereskedelmi célra gyártott grafikus kártyák közé tartoznak, azonban egy-egy háló betanítása így is megközelítőleg 1 óráig tartott rajtuk.
 
 \subsection{Látens reprezentációk strukturáltságának számszerűsítése}
 
@@ -454,11 +458,53 @@ Az általános, négyzetrácsot leíró metrika pedig a PCA-hoz hasonlóan az eg
 
 \subsubsection{Párhuzamosság metrika}
 
-Ennél a metrikánál azt számoljuk ki, hogy a vonalak mennyire párhuzamosak egymással.
+Ennél a metrikánál azt számoljuk ki, hogy a vonalak mennyire párhuzamosak egymással, ahelyett, hogy a vonalak egyenességének mértékét vizsgáljuk. 
+
+Ez a mérőszám azonban nem bizonyult hátékonynak, mivel a korábbi két metrikától eltérő eredményeket mutat. A \ref{para} ábrán két grafikon látható, melyek a PCA metrikát vetik össze a Párhuzomosság és Átlagos szög metrikával, az ábrázolt pontok pedig a $32\times32$-es eltolás mátrix vonalait jelölik. Látszik, hogy a PCA és Átlagos szög metrikák lényegében korrelálnak, míg a PCA és Párhuzamos metrikák gyakorlatilag függetlenek.
+
+\begin{figure}[h!]
+  \label{para}
+  \includegraphics[width=0.5\linewidth]{evr-vs-parallelness-ldim10.png}
+  \includegraphics[width=0.5\linewidth]{evr-vs-straightness-ldim10.png}
+  \caption{Bal oldalon (PCA / Párhuzamosság), jobb oldalon (PCA / Átlagos szög)}
+\end{figure}
+
 
 \subsection{Vizualizációs eszközök ismertetése}
 
-Elsősorban a Matplotlib nevű Python könyvtárat használjuk a grafikonok rajzolásához.
+Elsősorban a Matplotlib nevű Python könyvtárat használjuk a grafikonok rajzolásához, ebben a fejezetben azonban nem a grafikonok stílusára, vagy azok technikai felhasználására koncetnrálunk, hanem arra, hogy a kísérletek során milyen típusú adatokat ábrázolunk.
+
+\subsubsection{Metrika a paraméter függvényében}
+
+Egy kísérlet abból áll, hogy a VAE háló egy bizonyos paraméterét változtatjuk, és ennek hatását vizsgáljuk különböző metrikáinkra, veszteség függvényre és egyéb érdekes tulajdonságokra nézve. A legalapvetőbb ábrák ezért úgy néznek ki, hogy ezek közül egyet ábrázolunk az aktuális paraméter függvényében, például a PCA metrikát ábrázoljuk a tanítási idő függvényében. Egy ilyen ábra tehát egy egész kísérletet jellemez.
+
+Ezeken az ábrákon mindig a vízszintes tengelyen szerepel az aktuális paraméter, a függőlegesen pedig az, amit éppen mérünk. Attól függően, hogy az adott paraméternél, hogyan mintavételezünk (például, ha nagyságrendenként egy-egy adatunk van), egyes grafikonok $x$ tengelye logaritmikus skálázású is lehet. A \ref{mgraph} ábrán például egy háló rekonstrukciós vesztesége látható a $\beta$ paraméter függvényében.
+
+\begin{figure}[h!]
+\begin{center}
+  \label{mgraph}
+  \includegraphics[width=0.75\linewidth]{vae_beta-loss.png}
+  \caption{Rekonstrukciós veszteség $\beta$ függvényében}
+\end{center}
+\end{figure}
+
+\subsubsection{Látens vektor halmaz}
+
+A feladat alapján az a célunk, hogy minél struktúráltabb látens teret hozzunk létre. A nehézség azonban az, hogy a látens tér valójában sok dimenziós (annyi dimenziós, ahány neuronból áll a látens réteg), ezért önmagában nem tudjuk grafikusan ábrázolni. A legmagasabb dimenzió, ami még emberi szemmel feldolgozható a $3$, ezért $n$ dimenziós ponthalmazt $3$ dimenzióssá transzformlájuk. Nyilván ekkor, ha csak a ponthalmaz nem éppen egy háromdimenziós térre esik, ez a művelet infromáció veszteséggel jár.
+
+A transzformációt a PCA metrikából ismert PCA algoritmussal végezzük el, amely éppen egy olyan $3$ dimenziós térre képes levetíteni a ponthalmaz, hogy a lehető legkevesebb információt veszítsünk.
+
+Ebben a dolgozatban csak az alakzatok eltolása által kijelölt látens ponthalmazra koncentrálunk. A látens térben ezért egy bizonyos alakzat összes ($32\times32=1024$) féle elhelyezkedéséhez egy-egy látens pont tartozik. A könnyebb láthatóság érdekében ezen a grafikonon megszínezzünk a pontokat aszerint, hogy a hozzájuk tartozó alakzatnak mik a koordinátái. Egészen konkrétan minden pont színe két komponensből áll (zöld és piros), ahol a két szín az alakzat $x$ és $y$ koordinátájával arányosan változik, a tényleges színe pedig ezen két komponens keveréke. 
+
+Egy ilyen grafikon tehát egy adott hálót és ponthalmazt jellemez. A \ref{m3D} ábrán látható példa egy ilyen grafikonra.
+
+\begin{figure}[h!]
+\begin{center}
+  \label{m3D}
+  \includegraphics[width=1\linewidth]{3D-example.png}
+  \caption{Példa egy lántens vektor halmaz ábrázolására}
+\end{center}
+\end{figure}
 
 \subsection{Kísérletek}
 
@@ -466,15 +512,53 @@ Elsősorban a Matplotlib nevű Python könyvtárat használjuk a grafikonok rajz
 
 \subsubsection{Tanulási idő hatása}
 
+\begin{figure}[h!]
+\begin{center}
+  \label{epoch-loss}
+  \includegraphics[width=0.75\linewidth]{metrics/vae_epoch-loss.png}
+  \caption{Rekonstrukciós veszteség a tanítási idő függvényében}
+\end{center}
+\end{figure}
 
+\subsubsection{Tanulási ráta hatása}
+
+\begin{figure}[h!]
+  \label{para}
+  \includegraphics[width=1\linewidth]{parabolas.png}
+  \caption{A bal oldali ábrán egy kicsi, a jobb oldali ábrán pedig egy nagy tanítási ráta}
+\end{figure}
+
+
+
+\subsubsection{Súly felejétés mértékének hatása}
+
+\begin{figure}[h!]
+\begin{center}
+  \label{ldim-loss}
+  \includegraphics[width=0.75\linewidth]{metrics/vae_wd-loss.png}
+  \caption{Rekonstrukciós veszteség a súly felejtés mértékének függvényében}
+\end{center}
+\end{figure}
 
 \subsubsection{$\beta$ hiperparaméter hatása}
 
-
+\begin{figure}[h!]
+\begin{center}
+  \label{beta-loss}
+  \includegraphics[width=0.75\linewidth]{metrics/vae_beta-loss.png}
+  \caption{Rekonstrukciós veszteség a $\beta$ hiperparaméter függvényében}
+\end{center}
+\end{figure}
 
 \subsubsection{Látens tér dimenziójának hatása}
 
-
+\begin{figure}[h!]
+\begin{center}
+  \label{ldim-loss}
+  \includegraphics[width=0.75\linewidth]{metrics/vae_ldim-loss.png}
+  \caption{Rekonstrukciós veszteség a látens tér dimenziójának függvényében}
+\end{center}
+\end{figure}
 
 \subsubsection{Konvolúciós architektúra hatása}
 
