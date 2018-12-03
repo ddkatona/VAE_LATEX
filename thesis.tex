@@ -675,7 +675,21 @@ A \ref{beta-100} ábrán a gyakorlatban is láthatjuk, hogy a magas PCA érték 
 
 Az is várható természetesen, hogy a pontok $\beta=100$-nál az origóban sűrűsödnek, hiszen ekkor a KL divergencia, azaz az origóba húzó erő dominál.
 
-Jól struktúrált látens terek esetében értelme van a látens pontokat vektorként kezelni, melyek összegezhetőek és kivonhatóak egymásból. Az \ref{interp} ábrán négy kép látható. Mindegyik kép bal felső sarkában $3$ bázis kép van kirajzolva, melyek a tényleges adathalmazból származnak. A kép maradék része egy négyzetrács, melynek bal felső, jobb felső és bal alsó sarkaiban ezen három adatképnek a rekonstrukciója látható.
+Jól struktúrált látens terek esetében értelme van a látens pontokat vektorként kezelni, melyek összegezhetőek és kivonhatóak egymásból. Az \ref{interp} ábrán négy kép látható. Mindegyik kép bal felső sarkában $3$ bázis kép van kirajzolva, melyek a tényleges adathalmazból származnak. A kép maradék része egy négyzetrács, melynek bal felső ($\vec{A}$), jobb felső ($\vec{B}$) és bal alsó ($\vec{C}$) sarkaiban ezen három adatképnek a rekonstrukciója látható. A képen látható összes többi alakzat az $\vec{AB}$ és $\vec{AC}$ vektorok lineáris kombinációja $\vec{A}$-hoz hozzáadva, tehát $\vec{A}+\nu\vec{AB}+\mu\vec{AC}$ vektorú látens pontból generált kép. $\nu$ és $\mu$ a kis képek koordinátájával egyenletesen változik $0$ és $1$ között, vagyis a jobb alsó kép éppen az $\vec{A}+\vec{AB}+\vec{AC}$ koordinátájú látens pontból generálódótt. 
+
+Ha a reprezentációnk elég struktúrált, akkor egy két látens pont közötti vektor egy transzformációként értelmezhető. Ezeken az ábrákon például az $\vec{AB}$ vektor a bal felső sarokból jobb felső sarokba eltolás transzformációját jelöli. Hasonlóan az $\vec{AC}$ vektor egy $y$ irányú transzformációt ír le. Ha pedig a két vektor összegét tekintjük, akkor jogosan várhatjuk el azt, hogy az általa leírt transzformáció a két transzformáció egymás után való elvégzését fogja jelölni. A gyakorlatban tehát egy a jobb alsó sarokban elhelyezkedő négyzetet kellene látnunk a jobb alsó képen.
+
+A \ref{interp} ábrán látható négy rész ábra mind a fentiek alapján generálódik, mindössze annyiban különböznek, hogy más $\beta$ paraméterű ($\beta=0.2, 2,3,6$) hálók látens terét mutatják be. 
+
+A $\beta=0.2$ esetben azt látjuk, a három input kép sikeresen rekonstruálódik, azonban a két eltolási transzformáció összege (jobb alsó kis kép) szinte megegyezik a $\vec{C}$ vektorral, ami arra utal, hogy a látens térben $A$ és $B$ túlságosan közel van egymáshoz. Azt azonban legalább megtanulta a háló, hogy az $A, B$ és $C$ látens pontok mint négyzeteket ábrázolnak, ezért a $4$. pontnak is négyzetnek kell lennie. Megfigyelhető továbbá a képek között egy olyan zóna is, ahol a háló üres képeket rajzol. Ez a $\beta$ alacsony értékéből adódik, mivel $\beta=0.2$ az origóból kifelé ható erő dominál, ezért az eloszláson távol kerülnek egymástól és a térben lehetnek olyan részek, melyek semmilyen eloszláshoz nem esnek közel. A hálónak tehát nincsen tapasztalata erről, hogy az olyan látens vektorokhoz milyen képet kell generálnia, üres képeket ad.
+
+A $\beta=2$-es ábrán tulajdonképpen a $0.2$-es ábra problémái láthatóak, viszont az előnyei nélkül, tehát a háló nem tanulta meg a transzfomációt, viszont már az input képeket is csak részben képes rekonstruálni (jó pozícióba rajzolja, jó méretben, az alakzat körvonala azonban már nem vehető ki), az összeg helyére pedig már kifejezetten hibásan, ellipszist rajzol.
+
+$\beta=3$-nál jön el az a pont (a vizsgált $\beta$-k közül), ahol a háló már képes a két transzformációt egymás után elvégezni, hiszen láthatjuk, hogy a jobb alsó képen valóban a jobb alsó sarokba rajzol négyzetet. Az, hogy a jó pozíció mellett még az alakzatot is helyesen négyzetnek rajzolja a véletlen műve lehet, mivel a háló már egy ennél jelentősen egyszerűbb feladatot a rekonstrukciót sem tudja elvégezni (legalábbis az alakzat formáját tekintve), mivel az $A, B$ és $C$ sarkokban köröket látunk. Ez nem feltétlenül jelenti azt, hogy a háló nehezen különbözteti meg a négyzeteket a köröktől, inkább azzal indokolható a jelenség, hogy a kör alakzat kevés információ rendelkezésre állása esetén bármilyen alakzatra jó tipp a hálónak, kevés lesz az átlagos veszteség. A kör forma tehát inkább egy megforgatott négyzet vizuális kiátlagolásából adódik, mint a kör típusú adatból.
+
+$\beta=6$ esetén ennek a tendenciának a folyatása látható, itt már minden képen csak körök láthatóak. Transzformációs képesség szempontjából azonban minden korábbinál jobban viselkedik ez a háló, elég csak a legalsó sorra nézni, ahol szinte egy folytonos átmenet látható $x=1$-től az $x=31$ koordinátáig.
+
+Ez a négy ábra jól mutatja a $\beta$VAE működését, látszik ahogy $\beta$ növelésével egyre csökken a rekonstrukciós képesség, azonban eközben a látens tér egyre struktúráltabb, ezért képes a transzformációkat értelmezni. Az is látható továbbá, hogy a háló többi paraméterei ilyen értékekkel semmilyen $\beta$-ra sem eredményeznek egy olyan hálózatot, amely ezt a két képességet egyszerre teljesítik.
 
 \begin{figure}[h!]
 \begin{center}
@@ -684,12 +698,21 @@ Jól struktúrált látens terek esetében értelme van a látens pontokat vekto
   \includegraphics[width=0.49\linewidth]{metrics/interp-2.png}
   \includegraphics[width=0.49\linewidth]{metrics/interp3.png}
   \includegraphics[width=0.49\linewidth]{metrics/interp-6.png}
-  \caption{Bal felső: $\beta=0.2$, jobb felső: $\beta=2$, Bal alsó: $\beta=2$, jobb alsó: $\beta=6$,}
+  \caption{Bal felső: $\beta=0.2$, jobb felső: $\beta=2$, Bal alsó: $\beta=3$, jobb alsó: $\beta=6$,}
 \end{center}
 \end{figure}
 
+A $\beta$ hiperparaméterrel tehát a VAE és $\beta$VAE hálók esetében mindenképp érdemes foglalkozni, ezzel a paraméterrel lehet finomhangolni azt, hogy mennyit szeretnék elengedni a rekonstrukcióból a tér strukúráltsága értekében és fordítva. A különböző adathalmazok és felhasználási célok határozzák meg egy-egy konkrét esetben, hogy mennyire érdemes választani $\beta$-t.
 
 \subsubsection{Látens tér dimenziójának hatása}
+
+A látens tér dimenziójának hatását is megvizsgáltuk néhány esetre ($6, 8, 10, \dots , 20, 30, 40, 50$), melyek vetszeség függése a \ref{ldim-loss} ábrán látható. Itt gondolhatnánk azt, hogy a háló szűk keresztmetszetének (a látens tér dimenciójának) növelése javítja a rekonstrukciót, hiszen a generátornak több adat áll rendelkezésre, azonban ha csak ezt a paramétert növeljük, akkor ez éppen hogy megnehezíti a visszaállítást. Ugyannyi információból egy komplexebb hálót kell építenie.
+
+Az veszteség diagrammon is ez látszik, tehát ahogy növeljük a látens tér dimenzióját, úgy nő a veszteség is. Az $50$-es látens dimenzió esetében a kevés veszteség vélhetően csak egy szerencsés kezdetleges súly kiosztásnak köszönhető, azonban a $6$ és $8$ méretű látens tereknél így sem ér el jobb eredményt a rekonstrukció terén. 
+
+Nyilván a látens tér méretét nem lehet akáreddig csökkenteni a rekonstrukció javítása érdekében, hiszen egy $1$ neuronból álló szük kereszmetszet már biztosan nem tudna elkódolni egy $64\times64$-felbontású képet, legfeljebb akkor, ha minden pixel egyszerre változna. A mi adahalmazunk nem túl komplex, de ennél lényegesn bonyolultabb. Ahogy az a mellékelt címkékből is látszik, a Dsprite adathalmaz egy adatpontját $5$ számmal tudjuk leírni, mely az alakzatok $5$ független tulajdonságát jelöli.
+
+A $\beta$ paraméteres fejezetben láttunk egy példát arra, egy folytonos tulajdonság leírására elegendő mindössze $1$ neuron a látens rétegben (lásd. \ref{b4-splice}). Ideális esetben a látens tér dimenziója és a tulajdonságok száma között bijekció van. A látens teret ezért $5-6$ dimenziósnál kevesebbnek nincs értelme választani. A \ref{b4-splice} ábrához hasonlóan $5$ tulajdonság nem fog $5$ neuronnál lényegesen többet igénybe venni, $30$ neuron esetében várhatóan $20$-at szinte egyáltalán nem használ, ezért a felesleges látens neuronok csak egy zajt, potenciális hiba lehetőséget visznek a rendszerben, ami megnehezíti a rekonstrukciót.
 
 \begin{figure}[h!]
 \begin{center}
@@ -699,8 +722,27 @@ Jól struktúrált látens terek esetében értelme van a látens pontokat vekto
 \end{center}
 \end{figure}
 
+Nézzük meg az átlagos szög metrikánkat is ezekre az adatokra a \ref{ldim-metrics} árbán. Itt is egy romló tendenciát látunk a dimenzió növelésekor, amit éppen ugyanaz magyaráz meg mint a veszteséget: hiába növeljük a látens tér méretét, egy idő után a háló akkor sem fog több neuront igénybevenni, mert a kódolandó információ mértéke változatlan. 
+
+\begin{figure}[h!]
+\begin{center}
+  \label{ldim-metrics}
+  \includegraphics[width=0.75\linewidth]{metrics/vae_ldim-as.png}
+  \caption{Átlagos szög metrika}
+\end{center}
+\end{figure}
+
 \subsubsection{Konvolúciós architektúra hatása}
 
+Az összes kísérlet során konvolúciós hálókat alkalmaztunk, mivel ezek a hálók kifejezetten képek feldolgozására alkalmasak, azonban elméletben használhatnánk sűrű hálókat is, ezek azonban mind a klasszifikációs, mind a rekonstrukciós feladatokban rosszabb teljesítménnyel működnek. A \ref{3D-dense} árbán látható látens tér egy sűrű hálóhoz tartozik, és azt látjuk rajta, hogy habár a hasonló pozíciójú (pont színezésű) alakzatokhoz hasonló látens koordináták tartoznak, az árba strukúráltsága nem közelíti meg a konvolúciósakét.
+
+\begin{figure}[h!]
+\begin{center}
+  \label{3D-dense}
+  \includegraphics[width=\linewidth]{metrics/3D-dense.png}
+  \caption{Átlagos szög metrika}
+\end{center}
+\end{figure}
 
 \begin{thebibliography}{9}
 
