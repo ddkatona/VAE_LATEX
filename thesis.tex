@@ -136,8 +136,8 @@ A felelősséget végül nem a súlyokon, hanem a neuronokon fogjuk realizálni.
 \end{figure}
 
 A neuronokon azonban nincs mit megváltoztatni, csak a súlyok és biasek változtatása lehetséges. A súlyok megváltoztatására a képlet az alábbi:
-$$ w_{new} =  w_{old} + b_{error} * a_{activation} * l $$
-ahol $w$-vel jelölt értékekkel, a megváltoztatás előtti, illetve utáni súlyokat jelöljük, $a$ az - irányított - él kezdőpontja, $b$ pedig a végpontja, $l$ pedig a tanulás sebessége.
+$$ w_{new} =  w_{old} + b_{error} * a_{activation} * lr $$
+ahol $w$-vel jelölt értékekkel, a megváltoztatás előtti, illetve utáni súlyokat jelöljük, $a$ az - irányított - él kezdőpontja, $b$ pedig a végpontja, $lr$ pedig a tanulás sebessége.
 
 A backpropagationt több input-output párra is el kell végezzük, ekkor visszünk be információt a rendszerbe arról, hogy mely párokat tartunk helyesnek, és végül az algoritmus ebből fogja ezt a véges tudását általánosítani bármilyen - korábban nem látott - inputra. Azt a folyamatot amikor az összes kívánt párra lefuttatjuk a backpropagationt $epochnak$ nevezzük. 
 
@@ -279,6 +279,8 @@ A tanítás végeztével tehát a látens térből bárhonnan választhatunk vé
 
 A $\beta$VAE-k nagyon hasonlóak a rendes VAE hálókhoz, mindössze a loss functionben különböznek egymástól. A VAE-k esetében ez a veszteség két komponensből áll: a rekonstrukciós veszteségből és a KL divergenciából. A $\beta$VAE-ben szereplő béta minössze egy konstanst jelent, amely azt határozza meg, hogy a teljes veszteség kiszámításnál a két komponenst milyen súllyal számoljuk, egészen konkrétan a rekonstrukciós veszteségnek mindig $1$, a KL divergenciának pedig $\beta$ a súlya. A rendes VAE hálók tehát valójában $\beta=1$ paraméterű $\beta$VAE-k.
 
+A rekonstrukciós veszteség és a KL divergencia két egymásnak ellentétes erőhatásként képzelhető el a látens tér pontjaira nézve, ahol a rekonstrukciós veszteség célja az, hogy a pontok minél inkább távolodjanak az origótól (ezért egymástól is), így könnyebben megkülönböztethetőek legyenek a generálásnál, a KL divergencia pedig éppen az origó felé mozgatja azokat, hogy a térben kevés olyan térrész legyen ami betöltetlen. A $\beta$ paraméter ennek a két tendenciának az egymáshoz viszonított erősségét szabályozza.
+
 A gyakorlati tapasztalat azt mutatja, hogy az $1$-től eltérő $\beta$-k sok esetben javítanak az eredményeken.
 
 \section{Feladat}
@@ -383,8 +385,19 @@ shape	64,64
 testSize	10000
 trainSize	727200
 verbose	2
-weight_schedules size_loss|1|1|0|1,variance_loss|1|1|0|1
+weights size_loss|1,variance_loss|1
 \end{python}
+
+\subsubsection{Az általunk vizsgált paraméterek ismertetése}
+
+\begin{itemize}
+  \item Tanítási idő (\pythoninline{nb_epoch}): A teljes tanító adathalmazon annyiszor tanítjuk be a hálót, amennyi az epoch-ok száma. Azért van szükség egynél több epoch-ra, mert a tanítási rátát szándékosan alacsonyra állítjuk, ezért a súlyoknak többszöri frissítésre van szükségük, hogy elérjék az optimumot.
+  \item Tanítási ráta (\pythoninline{lr}): Annak a mértéke, hogy a súlyokat milyen mértékben változtatjuk ahhoz képest, hogy a backprogapation szerint mennyit kéne csökkenteni rajtuk az adott pillanatban. Ha a súly változtatás függvénye csak $ w_{new} =  w_{old} + b_{error} * a_{activation}$ lenne, akkor minden alkalommal túl sokat javítanánk a súlyokon, és a veszteség függvény értéke nagyon lassan csökkenne, vagy akár divergálna (lásd. \ref{para} ábra). Ezért kell a végén alkalmaznuk még egy $lr$ tényezőt.
+  \item Súly felejtés (\pythoninline{encoder_wd} és \pythoninline{decoder_wd} (weight decay)): Minden batch-ben ezzel a mértékkel csökken az összes súly értéke. Minél nagyobb az értéke annál jobban segíti a háló regularizációját (az output mennyire érzékeny az input kismértékű megváltozására). Képek esetén például általában nem kívánatos működés, ha az input egy pixelének változása óriási változást eredményez az outputon. Külön-külön beállítható az encoderre és decoderre.
+  \item $\beta$ hiperparaméter  (\pythoninline{weights}): A rekonstrukciós veszteség és KL divergencia szignifikaciájának aránya.
+  \item Látens tér dimenziója (\pythoninline{latent_dim}): Az autoencoder szűk keresztmetszetének mérete. Ennyi neuronnal kell a hálónak reprezentálnia az adatokat.
+  \item Háló architektúrája (\pythoninline{encoder} és \pythoninline{decoder}): A háló felépítésének típusa. Korábban tárgyaltunk erre két lehetőséget: a Súrú és Konvolúciós hálókat.
+\end{itemize}
 
 A tanítás végeztével az eredmények a keretrendszer működése szerint az .ini fájlban megadott \pythoninline{outputdir} mappába kerülnek (a fenti példában \pythoninline{pictures/beta_vae_tuned}). Ebben a directoryban a program eltárol egy "biztonsági" másolatot (\pythoninline{all_params.ini}) a .ini fájlról, hogy a futtatás után is láthassuk, milyen hálót tanítottunk. Eltáródik továbbá magának a hálónak az architektúrája az \pythoninline{encoder.json} és \pythoninline{generator.json} fájlokban (közvetlenúl ezt használja a program egy háló beolvasásához). Természetesen azt is el kell menteni, hogy mi lett a tanítás eredménye, vagyis a háló éleinek végeles súlyait. Ezeket a \pythoninline{encoder.h5} és \pythoninline{generator.h5} fájlokban tároljuk el. A háló utólagos kiértékelése/korábban ismeretlen adatokra futtatása esetén a program ezekből a fájlokból olvassa be és építi fel a hálót.
 
@@ -508,9 +521,24 @@ Egy ilyen grafikon tehát egy adott hálót és ponthalmazt jellemez. A \ref{m3D
 
 \subsection{Kísérletek}
 
+Azt vizsgáljuk a korábban definiált metrikáinkon keresztül, hogy az alábbi paraméterek hogyan hatnak a látens tér struktúráltságára. A struktúráltság azonban önmagában még nem eredményez egy jól működő hálót. Ahhoz, hogy egyáltalán az autoencoder szerepét betöltse a VAE, alacsonynak kell lennie a rekonstrukciós veszteségnek is (ezt egyszerűen ki tudjuk olvasni a tanítás során, nem kell új metrikát bevezetni hozzá), ezért a kísérleteknél vizsgáljuk az MSE-t (Mean Square Error) is. Ez egyszerűen az átlagos négyzetes hiba (a kapott és várt output között). Ezt mostantól hívjuk csak rekonstrukciós veszteségnek, hiszen ez az a mérőszám, ami azt írja le, hogy az autoencoder milyen mértékben tud rekonstruálni.
 
+A kísérletekben tehát egy-egy paramétert változtatunk, a többit viszont változatlanul hagyjuk. A paraméterek alapértékei (amikor éppen nem változnak) a következőek:
+
+\begin{itemize}
+  \item Tanítási idő: 15 epoch
+  \item Tanítási ráta: 0.0003
+  \item Súly felejtés: 0.0
+  \item $\beta$ hiperparaméter: 1
+  \item Látens tér dimenziója: 10
+  \item Háló architektúrája: konvolúciós
+\end{itemize}
 
 \subsubsection{Tanulási idő hatása}
+
+Ebben a kísérletben azt vizsgáltuk, hogy a tanítási idő miként hat a háló látens terének strukturáltságára. Összesen nyolcféle hálót teszteltünk, melyek kizárólag abban különböztek, hogy hány epoch-ig tartott a tanításuk. Ezek az epoch-hok a: $3, 6, 9, 12, 15, 18, 21, 24$. Ennek megvalósítására két megoldás is lehetséges: egy háló tanítását $3$ epoch-onként félbeszakítjuk és kimentjük a releváns adatokat, vagy $8$ különböző hálót tanítunk a kezdettől, és mindegyiket más-más epoch számig futtatunk. Az alábbi adatok az utóbbi megvalósításával keletkeztek.
+
+A \ref{epoch-loss} ábrán láthatjuk, hogy a zajtól eltekintve a $15$ és $24$ közötti epoch számok bizonyulnak a legkevesebb veszteséggel járó paraméterezésnek. Érthető az is, hogy a rövid ($3-12$ epoch-os) tanítás még nem elegendő idő a hálónak arra, hogy hatékonyan rekonstruáljon.
 
 \begin{figure}[h!]
 \begin{center}
@@ -520,7 +548,28 @@ Egy ilyen grafikon tehát egy adott hálót és ponthalmazt jellemez. A \ref{m3D
 \end{center}
 \end{figure}
 
+Vizsgáljuk meg a metrikáinkat is (lásd \ref{epoch-metrics}). A PCA metrika alapján az alacsony epoch számok eredményezik a legstruktúráltabb látens teret, azonban korábban láttuk, hogy olyankor még nagyon alacsony a rekonstrukciós képesség. Az Átlagos szög metrikát nézve pedig az látható, hogy $18$ epoch-nál volt a legkisebb az átlagos görbület ($20^\circ$), habár még $15$-nél is mindössze $27^\circ$.
+
+\begin{figure}[h!]
+  \label{epoch-metrics}
+  \includegraphics[width=0.5\linewidth]{metrics/vae_epoch-pca.png}
+  \includegraphics[width=0.5\linewidth]{metrics/vae_epoch-as.png}
+  \caption{Bal oldalon a PCA metrika, jobb oldalon az Átlagos szög metrika}
+\end{figure}
+
+A két metrika és veszteség alakulását tekintve tehát a $18$ epochig való tanítás tűnik általánosságban a legoptimálisabbnak. A \ref{3D-epoch} ábrán látható, hogy $3$ dimenzióba vetítve, hogy néz ki egy konkrét alakzat eltolása az összes lehetséges pozícióba (összesen tehát $32\times32=1024$ darab pont van az ábrán). Az ábra a $18$ epochig futtatott hálóhoz tartozik és látszik rajta, hogy struktúráltan reprezentálja az egymáshoz képest csak egy eltolásban különböző alakzatokat. Tisztán kivehetőek szabad szemmel is az $x$ és $y$ irányú (zöld és piros) görbék, sőt még a meghajlított négyzetháló is jól látszik.
+
+\begin{figure}[h!]
+\begin{center}
+  \label{3D-epoch}
+  \includegraphics[width=1\linewidth]{metrics/3D-epoch18.png}
+  \caption{$18$ epoch tanítás után a látens tér}
+\end{center}
+\end{figure}
+
 \subsubsection{Tanulási ráta hatása}
+
+Ebben a kísérletben a tanítási rátát változtatjuk.
 
 \begin{figure}[h!]
   \label{para}
@@ -532,15 +581,42 @@ Egy ilyen grafikon tehát egy adott hálót és ponthalmazt jellemez. A \ref{m3D
 
 \subsubsection{Súly felejétés mértékének hatása}
 
+Ebben a kísérletben a súly felejtés mértékének hatását vizsgáltuk meg összesen $11$ hálóra. A paraméter tesztelt értékei: $0.0005, 0.001, 0.002, 0.003, \dots , 0.009, 0.01$.
+
+A \ref{wd-loss} ábrán láthatjuk ismét a rekonstrukciós veszteséget, az aktuális paraméter, tehát a súly felejtés függvényében. Azt tapasztaljuk, hogy a veszteségre nincs számottevő hatása a súly felejtésnek, hiszen ezekre a paraméterekre (már pedig ennél nagyobb súly felejtést nem is szokás használni) semmilyen korreláció nincsen súly felejtés és a veszteség között. 
+
+Érdemes megfigyelni azt is, hogy míg például az epoch számos kísérletnél a veszteségek $26$-tól $34$-ig terjedtek, addig itt mindössze egy $3.5$ pontos intervallumban helyezkednek el. Ez annyit jelent, hogy habár ránézésre véletlenszerűnek tűnnek a veszteségek, valójában arról van szó, hogy a súly felejtés lényegében nem tudja változtatni a rekonstrukciós hibát.
+
+
+
 \begin{figure}[h!]
 \begin{center}
-  \label{ldim-loss}
+  \label{wd-loss}
   \includegraphics[width=0.75\linewidth]{metrics/vae_wd-loss.png}
   \caption{Rekonstrukciós veszteség a súly felejtés mértékének függvényében}
 \end{center}
 \end{figure}
 
+A \ref{wd-metrics} ábrára nézve a korábbiakhoz hasonlóan a PCA és Átlagos szög metrikák látszanak és hasonló a tapasztalat a veszteséghez: a látenstér struktúráltsága is független a súly felejtés mértékétől.
+
+\begin{figure}[h!]
+  \label{wd-metrics}
+  \includegraphics[width=0.5\linewidth]{vae_wd-pca.png}
+  \includegraphics[width=0.5\linewidth]{vae_wd-as.png}
+  \caption{Bal oldalon a PCA metrika, jobb oldalon az Átlagos szög metrika}
+\end{figure}
+
+Láthatjuk tehát - legalábbis a szintetikus adathalmazunkra - , hogy a súly felejtés mértéke sem a rekonstrukcióra sem a reprezentációra nincs jól definiálható hatással.
+
 \subsubsection{$\beta$ hiperparaméter hatása}
+
+A hagyományos VAE hálókban nem szerepel $\beta$ paraméter, csak a kiterjesztett $\beta$VAE hálókban. Emiatt azonban nem kell teljesen megváltoztatni az alap architektúrát, mivel a VAE egy speciális változata a $\beta$VAE-nak.
+
+A $\beta$ paraméter - amint azt már korábban említettünk - azt határozza meg, hogy a látens térben rekonstrukció origóból kifele mutató és a KL divergencia origóba befelé mutató húzó erejének mi az aránya. Ha $\beta>1$ akkor a KL divergencia, ha $\beta<1$, akkor a rekonstrukciós erő dominál ($\beta=1$, akkor pedig egy hagyományos VAE hálóról beszélünk).
+
+Ezt a paramétert számos értékre megvizsgáltuk: $0.2$-től $2.0$-ig $0.2$-esével, majd onnantól egyre ritkábban, egészen $100$-ig. A \ref{beta-loss} ábrán a rekonstrukciós veszteséget megtekintve azt láthatjuk, hogy lényegében a $\beta$ paraméter növelésével monoton csökken, egyre kisebb mértékben és nagyjából $155$-höz konvergál. 
+
+Ez a viselkedés teljes mértékben megfelel a várakozásoknak, hiszen $\beta$ növelése éppen azt jelenti, hogy a súlyok felülírása egyre kevésbé függ a rekonstrukciós hibától és egyre jobban függ a KL divergenciától. $\beta=40$ érték közelében éri el a háló a maximális veszteséget, tehát ez az a pont, amikor a $\beta$VAE elveszti autoecoder jellegét. Ilyen és ennél magasabb $\beta$ értékek esetén már tehát szinte egyáltalán nem képes a háló rekontrukcióra.
 
 \begin{figure}[h!]
 \begin{center}
@@ -549,6 +625,69 @@ Egy ilyen grafikon tehát egy adott hálót és ponthalmazt jellemez. A \ref{m3D
   \caption{Rekonstrukciós veszteség a $\beta$ hiperparaméter függvényében}
 \end{center}
 \end{figure}
+
+Ha egy megfelelő reprezentációt keresünk, akkor természetesen az is szükséges, hogy az adatokat egyáltalán rekonstruálni képes legyen a háló. Tekintsük meg a \ref{beta-pca} ábrán a PCA metrikát minden $\beta$-ra, ahol ugyebár a magas értékeknek tulajdonítunk struktúrált látens tereket. Az ábra $\beta$-t ábrázoló tengelye logaritmikus skálázású, tehát a a valóságban a jobb felső négy pontnak nagyságrendbeli eltérése van a középső pontoktól.
+
+A veszteség függvény beláttuk, hogy a nagyon magas $\beta$-k körében értelmetlen vizsgálódni, azonban a PCA metrika mutat két kiugró pontot, mely nagyon jól struktúrált látens teret ígér ($\beta=4$ és $\beta=8$ paraméterekre), hiszen megközelítőleg információ veszteség nélkül tudjuk a négyzetrács görbéinek pontjait $10$ dimenzióban egy egyenesre vetíteni (más szóval a PCA metrika majdnem $1$).
+
+\begin{figure}[h!]
+\begin{center}
+  \label{beta-pca}
+  \includegraphics[width=0.75\linewidth]{metrics/vae_beta-pca-log.png}
+  \caption{PCA metrika}
+\end{center}
+\end{figure}
+
+Lássuk tehát, hogy ezen két háló látens tere hogyan mutat $3$ dimenzióba vetítve (lásd \ref{3D-b4} és \ref{3D-b8} ábrák). A két ábra valójában nagyon hasonlít egymásra, a különbség nagy része az, hogy a vetítés során más lett az orientációjuk, a $\beta=4$-es ábrán azonban jobban látszik a strukrúra.
+
+Tisztán kivehető az alakzatmátrixhoz tartozó négyzetrács, azt is látjuk, hogy az egyik tengely mentén meg van hajlítva. A másik tengely esetében viszont teljesül az az elvárásunk, hogy egy $1$ dimenziós tulajdonságot (az alakzat $x$ koordinátáját) a látens térben egy $1$ dimenziós ponthalmaz, egy egyenes reprezentáljon. A rátekintési szögtől eltekintve éppen ezt figyelhetjük meg a $\beta=8$-as ábrán is. A látens pontok tehát olyan mértékben struktúráltan helyezkednek el, hogy már egy ilyen ábra alapján is fel tudjuk ismerni az $x=4$ koordinátájú alakzatokat.
+
+\begin{figure}[h!]
+\begin{center}
+  \label{3D-b4}
+  \includegraphics[width=\linewidth]{metrics/3D-b4.png}
+  \caption{$\beta=4$}
+\end{center}
+\end{figure}
+\begin{figure}[h!]
+\begin{center}
+  \label{3D-b8}
+  \includegraphics[width=\linewidth]{metrics/3D-b6.png}
+  \caption{$\beta=8$}
+\end{center}
+\end{figure}
+
+A reprezentáció azonban még ennél is hatékonyabb. A \ref{b4-splice} ábrán $10$ darab grafikon látható függőlegesen elhelyezve. Mindegyik grafikon egyetlen látens neuron aktivációjának változását ábrázolja annak függvényében az input kép alakzatának $x$ koordinátájának függvényében. A másik, $y$ tengely értéke konstans $16$ (tehát a középső soron iterálunk végig). Ezt a műveletet pedig - ahogy a metrikák esetében is - sokféle alakzat, méret, orientáció hármasra elvégezzünk, és az eredményeiket átlagoljuk. Ezeket látjuk a grafikonokon. 
+
+Azt tapasztaljuk, hogy lényegében egy konkrét neuron, a $9$. (alulról a második) az egyetlen, amely aktivációja lényegesen megváltozik, amikor az $x$ koordinátát változtatjuk. Eközben az összes többi neuron változatlan aktivitást mutat, kivéve az $5.$-et amely kis mértékben, de változtatja az értékét. A $9$. neuron ráadásul nem is véletlenszerűen változik, hanem szigorúan monoton csökken, közel lineárisan az $x$ koordináta növelésével.
+
+Ebben a példában tehát azt látjuk, hogy a látens tér $9$. koordinátája közvetlenül és önállóan reprezentálja  az alakzatok $x$ koordinátáját, lényegében fordítottan arányos vele.
+
+\begin{figure}[h!]
+\begin{center}
+  \label{b4-splice}
+  \includegraphics[width=0.5\linewidth]{slice_y16_all_coordsb4.png}
+  \caption{látens neuronok használata, $\beta=4$}
+\end{center}
+\end{figure}
+
+A \ref{beta-100} ábrán a gyakorlatban is láthatjuk, hogy a magas PCA érték ellenére, miért használhatatlan a $\beta=100$-as háló.  Ahhoz hogy ezt megértsük a PCA metrika definícióját kell használnunk. Akkor magas az érték, ha a ponthalmaz minimális veszteséggel vetíthetó egy egyenesre, a veszteség pedig a vetítések távolságának valamilye aggregált értéke. Az ábrára tekintve azonban azt látjuk, hogy a teljes ponthalmaz kiterjedése kevesebb mint $10^{-10}$ ($\beta=4$-re ez az érték $3$ körüli). Ezért bármilyen origót metsző egyenesre kis veszteséggel rávetíthetőek a pontok, hiszen már lényegében az origó pontjában tömörülnek. A PCA metrika tehát ilyen esetben garantáltan az $1$ hez fog tartani, és nem hordoz magában hasznos információt.
+
+Az is várható természetesen, hogy a pontok $\beta=100$-nál az origóban sűrűsödnek, hiszen ekkor a KL divergencia, azaz az origóba húzó erő dominál.
+
+Jól struktúrált látens terek esetében értelme van a látens pontokat vektorként kezelni, melyek összegezhetőek és kivonhatóak egymásból. Az \ref{interp} ábrán négy kép látható. Mindegyik kép bal felső sarkában $3$ bázis kép van kirajzolva, melyek a tényleges adathalmazból származnak. A kép maradék része egy négyzetrács, melynek bal felső, jobb felső és bal alsó sarkaiban ezen három adatképnek a rekonstrukciója látható.
+
+\begin{figure}[h!]
+\begin{center}
+  \label{interp}
+  \includegraphics[width=0.49\linewidth]{metrics/interp02.png}
+  \includegraphics[width=0.49\linewidth]{metrics/interp-2.png}
+  \includegraphics[width=0.49\linewidth]{metrics/interp3.png}
+  \includegraphics[width=0.49\linewidth]{metrics/interp-6.png}
+  \caption{Bal felső: $\beta=0.2$, jobb felső: $\beta=2$, Bal alsó: $\beta=2$, jobb alsó: $\beta=6$,}
+\end{center}
+\end{figure}
+
 
 \subsubsection{Látens tér dimenziójának hatása}
 
