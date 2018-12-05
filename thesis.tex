@@ -83,7 +83,7 @@ Ez így elég egyszerűen hangzik, mivel még nem tárgyaltunk arról, hogy ez a
 \end{figure}
 
 
-A neurális háló tulajdonképpen egy súlyozott gráf, melynek $n$ darab csúcsa a bemeneteket reprezentálja, $k$ darab csúcsa pedig a kimeneteket. Az $n$ és $k$ csúcsok halmazát rendre input és output layernek (rétegnek) nevezzük, azonban a maradék csúcsok több kisebb halmazra bonthatóak, az úgynevezett hidden (rejtett) rétegekre. 
+A neurális háló tulajdonképpen egy súlyozott gráf (előrecsatolt háló), melynek $n$ darab csúcsa a bemeneteket reprezentálja, $k$ darab csúcsa pedig a kimeneteket. Az $n$ és $k$ csúcsok halmazát rendre input és output layernek (rétegnek) nevezzük, azonban a maradék csúcsok több kisebb halmazra bonthatóak, az úgynevezett hidden (rejtett) rétegekre. 
 
 Egy egyszerű neurális háló tehát $L$ darab layerből áll, melyek közül az input és output layerek speciális funkciót látnak el. A rétegeknek van egy rögzített sorrendje, amely egy neurális hálónak fix tulajdonsága, sosem változik meg. Sorrendben az első réteg az input layer, amit néhány rejtett réteg követ, majd egy output layer zárja a listát.
 
@@ -98,12 +98,12 @@ Minden réteget neuronok egy halmaza alkot. Ezek a gráf csúcsai. Az élek kiz�
   \caption{Egy neuron}\label{ab1.3}
 \end{figure}
 
-A neuronoknak van egy úgynevezett aktivációs értékük, amely minden pillanatban az az érték, amelyet utoljára -- manuálisan vagy automatikusan -- beállítottunk neki. Egy neuron aktivációs értéket úgy határozzuk meg, hogy vesszük a neuron rétegét megelőző layer azon neuronjait, amelyekkel össze van kötve, majd vesszük ezeknek a lineáris kombinációját a hozzájuk tartozó élek súlyaival. Ehhez még hozzáadunk egy bias értéket, amely magához a vizsgált neuronhoz tartozik és szintén egy $0$ és $1$ közé eső skalár.
-Ezután még az így kapott összegre alkalmazunk egy úgynevezett aktivációs függvényt, amely ugyancsak a neuronhoz tartozik (bár általában egy rétegben minden ez neuronra azonos).
+A neuronoknak van egy úgynevezett aktivációs értékük, amely minden pillanatban az az érték, amelyet utoljára beállítottunk neki. Egy neuron aktivációs értéket úgy határozzuk meg, hogy vesszük a neuron rétegét megelőző layer azon neuronjait, amelyekkel össze van kötve, majd vesszük ezeknek a lineáris kombinációját a hozzájuk tartozó élek súlyaival. Ehhez még hozzáadunk egy bias értéket, amely magához a vizsgált neuronhoz tartozik és szintén egy tetszőleges valós szám.
+Ezután még az így kapott összegre alkalmazunk egy úgynevezett aktivációs függvényt, amely ugyancsak a neuronhoz tartozik (bár általában egy rétegben ez minden neuronra azonos).
 (\ref{ab1.3}.~ábra)
 
 
-Az aktivációs függvény rendeltetése, hogy a lineáris kombináció és a bias hozzáadása után keletkezett --- várhatóan $1$-nél nagyobb --- számot visszaskálázzuk a $[0-1]$ intervallumba.
+Az lineáris kombináció és a bias hozzáadása után keletkezett valós szám még nem az aktivációs érték lesz, hanem az aktivációs függvény értéke, ezen a helyen.
 Többféle aktivációs függvény is használhatunk, a leggyakoribbak:
 
 \begin{itemize}  
@@ -166,7 +166,7 @@ ahol $w$-vel jelölt értékekkel, a megváltoztatás előtti, illetve utáni s�
 
 A backpropagationt több input-output párra is el kell végezzük, ekkor viszünk be információt a rendszerbe arról, hogy mely párokat tartunk helyesnek, és végül az algoritmus ebből fogja ezt a véges tudását általánosítani bármilyen -- korábban nem látott -- inputra. Azt a folyamatot amikor az összes kívánt párra lefuttatjuk a backpropagationt \emph{epochnak} nevezzük. 
 
-Ha általában meg szeretnénk mérni azt, hogy a jelenlegi háló milyen hatásfokkal tud perdiktálni, akkor nem elég a tanítás közben megnézni, mekkora hibákat backpropagál program, mivel az egész háló arra van optimalizálva, hogy erre a konkrét tanító adathalmazra hatékonyan működjön. Éppen ezért a tanítás előtt két részre osztjuk az adathalmazt:
+Ha általában meg szeretnénk mérni azt, hogy a jelenlegi háló milyen hatásfokkal tud prediktálni, akkor nem elég a tanítás közben megnézni, mekkora hibákat backpropagál program, mivel az egész háló arra van optimalizálva, hogy erre a konkrét tanító adathalmazra hatékonyan működjön. Éppen ezért a tanítás előtt két részre osztjuk az adathalmazt:
 
 \begin{itemize}  
 	\item tanító adatok (\emph{train set}): amelyeken végrehajtjuk a backpropagationt, 1 epochban minden adatra egyszer
@@ -211,7 +211,7 @@ A réteg neuronjainak aktivációját a következőképpen számoljuk ki: az el�
 \end{center}
 \end{figure}
 
-Egy konvolúciós rétegnek vannak egyéb -- kevésbé fontos -- paraméterei is a filterek száma és az ablakméret mellett, például az hogy az ablak eltolásánál hány neuronnyit lépünk (\emph{stride}) vagy az ablak viselkedése a neuronmátrix határán (\emph{padding}).
+Egy konvolúciós rétegnek vannak egyéb paraméterei is a filterek száma és az ablakméret mellett, például az hogy az ablak eltolásánál hány neuronnyit lépünk (\emph{stride}) vagy az ablak viselkedése a neuronmátrix határán (\emph{padding}), ezekkel azonban a dolgozat keretein belül nem foglalozunk.
 
 \subsection{Pooling réteg}
 
@@ -231,7 +231,9 @@ Pooling rétegeket általában két konvolúciós réteg között szoktak haszn�
 
 \section{Autoencoderek}
 
-Az autoencoderek olyan speciális neurális hálók, amelyek képesek az input rétegükre érkező adatot egy rövid kóddá tömöríteni (\emph{encode}), majd abból a kódból az eredeti inputot visszaállítani (\emph{decode}). Ezt a két funkciót egyetlen hálóval valósítjuk meg, azonban a hálón belül jól elkülönül a két rész: a rétegek első fele végzi el a kódolást, a második fele pedig a dekódolást. Az encodernek folyamatosan csökkennek, a decodernek pedig növekszenek a rétegeik mérete, ahogy ezt a \ref{AE_arch2}.~ábra mutatja. Az encode-olás és decode-olás egymás utáni elvégzése elméletben egy identitás. A tanítás során ezért a kimeneten várt érték maga az input, nincs szűkségünk adatpárokra, pusztán kódolandó adatokra. A háló tanításához szűkséges hibát tehát a rekonstrukció hatásfoka fogja meghatározni.
+Az autoencoderek olyan speciális neurális hálók, amelyek képesek az input rétegükre érkező adatot egy rövid kóddá tömöríteni (\emph{encode}), majd abból a kódból az eredeti inputot visszaállítani (\emph{decode}). Ezt a két funkciót egyetlen hálóval valósítjuk meg, azonban a hálón belül jól elkülönül a két rész: a rétegek első fele végzi el a kódolást, a második fele pedig a dekódolást. Az encodernek folyamatosan csökkennek, a decodernek pedig növekszenek a rétegeik mérete, ahogy ezt a \ref{AE_arch2}.~ábra mutatja. Az encode-olás és decode-olás egymás utáni elvégzése elméletben egy identitás. A tanítás során ezért a kimeneten várt érték maga az input, nincs szükségünk adatpárokra, pusztán kódolandó adatokra. A háló tanításához szükséges hibát tehát a rekonstrukció hatásfoka fogja meghatározni. A veszteség függvénye konkrétan az alábbi:
+
+$$ \mathbb{E}_{q_\phi(z|x)} [\log p_\phi(x|z)]$$
 
 A háló ,,közepén'' elhelyezkedő legkisebb méretű réteget reprezentációs vagy látens rétegnek nevezzük, a kiértékelés során az itt megjelenő aktivációs értékek vektora jelenti a kódot. Ez a kód valóban az inputra érkező adatot reprezentálja, hiszen az adatból (az encoderrel) elő tudjuk állítani a kódot, a kódból pedig (a decoderrel) vissza tudjuk állítani az adatot.
 
@@ -251,7 +253,7 @@ A \ref{AE_arch2}.~ábrán látható input egy kép, az MNIST adathalmazból, mel
 
 \section{Generatív modellezés}
 
-A generatív modellezés célja, hogy egy adott (felirat mentes) adathalmazból tanulva új adatokat tudjuk generálni ugyanazon eloszlásból, mint amelyből a tanító adatok származnak. Például ha macskákról készült képekkel tanítjuk a modellt, akkor az képes lesz új, korábban nem látott macskákat tartalmazó képeket generálni.
+A generatív modellezés célja, hogy egy adott (címkézetlen) adathalmazból tanulva új adatokat tudjuk generálni ugyanazon eloszlásból, mint amelyből a tanító adatok származnak. Például ha macskákról készült képekkel tanítjuk a modellt, akkor az képes lesz új, korábban nem látott macskákat tartalmazó képeket generálni.
 
 A gyakorlatban használt két legfőbb generatív modell architektúra:
 \begin{itemize}
@@ -259,15 +261,15 @@ A gyakorlatban használt két legfőbb generatív modell architektúra:
   \item Variational AutoEncoder (VAE)
 \end{itemize}
 
-Az eddigi eredmények azt mutatják, hogy a GAN-ok általában jobb eredményeket adnak, mint a VAE-k, azonban a dolgozatban a VAE-ket fogjuk mélyebben vizsgálni, a GAN-ok csak említés szintjén szerepelnek.
+Jelenleg a GAN-ok a VAE-knél sikeresebb modellcsalád a generatív modellezés feladatára, de mi a dolgozatban a VAE-kre fogjuk helyezni a hangsúlyt, mégpedig azért, mert az autoencoder alapú modellek alkalmasabbak reprezentáció-tanulásra. A reprezentáció-tanulás fogalmát később fogjuk bevezetni, de röviden azt jelenti, hogy a hálózat képes automatikusan feltárni az adatainkban rejlő szabályszerűségeket.
 
 \subsection{Generative Adversarial Network (GAN)}
 
 A GAN-ok, tehát ahogy korábban már említettük, olyan neurális hálózatok, melyek képesek az input adathalmaz eloszlásából újabb, véletlenszerű adatokat generálni. Ezt -- az autoencoderekhez hasonlóan -- két egymástól funkcionálisan eltérő neurális háló együttes használatával érjük el a GAN esetében. A két hálót \textit{generátornak} és \textit{diszkriminátornak} nevezzük.
 
-A generátor feladata, hogy egy véletlenszerű kódból előállítson egy adatot az adathalmaz eloszlásából. Az háló inputja tehát egy véletlen zaj, azaz minden input neuronnak egy véletlen értéket adunk meg mind tanításkor, mind kiértékeléskor. Már csak annyi a kérdés, hogy hogyan tudjuk eldönteni az output rétegén megjelenő generált adatról, hogy valóban a kívánt adathalmazból származik-e. Ezen eldöntendő kérdés megválaszolására használjuk a diszkriminátort. A generátor súlyait ezért annak függvényében változtatjuk, hogy a diszkriminátor milyen mértékben tartja valódinak az adatot.
+A generátor feladata, hogy egy véletlenszerű kódból előállítson egy adatot az adathalmaz eloszlásából. A háló inputja tehát egy véletlen zaj, azaz minden input neuronnak egy véletlen értéket adunk meg mind tanításkor, mind kiértékeléskor. Már csak annyi a kérdés, hogy hogyan tudjuk eldönteni az output rétegén megjelenő generált adatról, hogy valóban a kívánt adathalmazból származik-e. Ezen eldöntendő kérdés megválaszolására használjuk a diszkriminátort. A generátor súlyait ezért annak függvényében változtatjuk, hogy a diszkriminátor milyen mértékben tartja valódinak az adatot.
 
-A diszkriminátor feladata tehát, hogy egy adatról eldöntse, valóban az adathalmazból származik-e. Az inputja egy adat, az outputja pedig mindössze két neuronból áll: egy igen és egy nem választ jelző neuronból. A diszkriminátornak felváltva adunk adatokat az adathalmazból és a generátor kimenetéről, mindkét esetben tudjuk, hogy minek kell lennie a várt eredménynek, így idővel megtanulja megkülönböztetni egymástól a valós és generált adatokat. 
+A diszkriminátor feladata tehát, hogy egy adatról eldöntse, valóban az adathalmazból származik-e. Az inputja egy adat, az outputja pedig mindössze egy neuronból áll: amely az input hitelességének valószínűségét jelzi. A diszkriminátornak felváltva adunk adatokat az adathalmazból és a generátor kimenetéről, mindkét esetben tudjuk, hogy minek kell lennie a várt eredménynek ($0$ vagy $1$), így idővel megtanulja megkülönböztetni egymástól a valós és generált adatokat. 
 
 A két hálót tehát párhuzamosan tanítjuk, a generátor folyamatosan megtanul adatokat generálni az adathalmaz eloszlásából, a diszkriminátor pedig folyamatosan megtanulja ,,leleplezni'' a generátort. A modell alapvető felépítését a \ref{gan}.~ábra szemlélteti.
 
@@ -283,7 +285,7 @@ A két hálót tehát párhuzamosan tanítjuk, a generátor folyamatosan megtanu
 \end{center}
 \end{figure}
 
-Az utóbbi néhány évben nagy fejlődésen mentek keresztül a GAN-ok. A \ref{gan_progress}.~ábrán látható képeket a Celeba adathalmaz (lásd később) eloszlásából generálták GAN architektúrájú hálókkal. Jól látszik, hogy az elmúlt 5 évben mekkora fejlődésen ment keresztül a szakirány. 
+Az utóbbi néhány évben nagy fejlődésen mentek keresztül a GAN-ok. A \ref{gan_progress}.~ábrán látható képeket a Celeba adathalmaz (amely híres emberek címkézett arcképeit tartalmazza) eloszlásából generálták GAN architektúrájú hálókkal. Jól látszik, hogy az elmúlt 5 évben mekkora fejlődésen ment keresztül a szakirány. 
 
 \begin{figure}[h!]
 \begin{center}
@@ -300,7 +302,7 @@ Az utóbbi néhány évben nagy fejlődésen mentek keresztül a GAN-ok. A \ref{
 \section{Variational Autoencoder (VAE)}
 
 A variational autoencoderek a GAN-okhoz hasonlóan generatív modellek, azonban a felépítésük -- ahogy a nevükben is szerepel --  nagyban hasonlítanak a hagyományos autoencoderekhez.
-Első ránézésre az autoencoderek is alkalmasnak tűnnek a generálásra, hiszen a decoder komponensük képes egy látens vektorból előállítani egy adatod, ezért ha egy korábban ismeretlen látens vektorra futtatjuk a decodert, akkor egy új, de mégis hiteles adatot kapnánk. Ez azonban nem működik, mert az autoencoder látens terében a gyakorlatban bizonyos térrészek teljesen érintetlenül maradnak, így a háló nincs felkészülve arra, hogy a látens tér azon szegmenséből generáljon (decode-oljon) adatot.
+Első ránézésre az autoencoderek is alkalmasnak tűnnek a generálásra, hiszen a decoder komponensük képes egy látens vektorból előállítani egy adatpontot, ezért ha egy korábban ismeretlen látens vektorra futtatjuk a decodert, akkor egy új, de mégis hiteles adatot kapnánk. Ez azonban nem működik, mert az autoencoder látens terében a gyakorlatban bizonyos térrészek teljesen érintetlenül maradnak, így a háló nincs felkészülve arra, hogy a látens tér azon szegmenséből generáljon (decode-oljon) adatot.
 
 Ezt a problémát oldja meg a VAE azzal a trükkel, hogy az encodere nem egy konkrét látens vektort állít elő, mint az adat reprezentációs alakja, hanem egy normális eloszlást. A variational autoencodereknél valójában ez az eloszlás reprezentálja az adatot, ami két vektort jelent: egy várható érték és szórás vektort, melyek koordinátánként értendőek a látens vektorra nézve. A tanítás során tehát a decoder (amit a VAE esetében már generátornak is nevezhetünk) inputja egy véletlenszerű vektor ebből az eloszlásból (lásd \ref{vae}.~ábra).
 
@@ -318,27 +320,32 @@ Ezt a problémát oldja meg a VAE azzal a trükkel, hogy az encodere nem egy kon
 
 A VAE-k másik fő eltérése a hagyományos autoencoderektől, hogy a backpropagation során nem pusztán a rekonstrukció sikeressége szerint javítják a háló súlyait, hanem az KL (Kullback–Leibler) divergencia függvényében is. A KL divergencia nem a kimeneten kapott adatot minősíti, hanem azt, hogy a létrejött eloszlások hogyan helyezkednek el a látens térben. Röviden: az olyan eloszlás halmazokat jutalmazza, amelyek egyenletesen fedik le a látens teret. A tanítás során ezért az adathalmaz adataihoz párosítható látens reprezentációk az egész teret lefedik.
 
+A hagyományos VAE hálók veszteség függvénye az alábbi:
+$$ \mathbb{E}_{q_\phi(z|x)} [\log p_\phi(x|z)] + D_{KL}(q_\phi(z|x)||p_\phi(z))$$
+
 A tanítás végeztével tehát a látens térből bárhonnan választhatunk véletlen vektorokat, azokból valósághű adatotokat fog generálni a decoder.
 
-\section{Módosított variational autoencoderek ($\beta$VAE)}
+\section{Módosított variational autoencoderek ($\beta$-VAE)}
 
-A $\beta$VAE-k nagyon hasonlóak a rendes VAE hálókhoz, mindössze a veszteség függvényben különböznek egymástól. A VAE-k esetében ez a veszteség két komponensből áll: a rekonstrukciós veszteségből és a KL divergenciából. A $\beta$VAE-ben szereplő béta mindössze egy konstanst jelent, amely azt határozza meg, hogy a teljes veszteség kiszámításnál a két komponenst milyen súllyal számoljuk, egészen konkrétan a rekonstrukciós veszteségnek mindig $1$, a KL divergenciának pedig $\beta$ a súlya. A rendes VAE hálók tehát valójában $\beta=1$ paraméterű $\beta$VAE-k.
+A $\beta$-VAE-k nagyon hasonlóak a rendes VAE hálókhoz, mindössze a veszteség függvényben különböznek egymástól. A VAE-k esetében ez a veszteség két komponensből áll: a rekonstrukciós veszteségből és a KL divergenciából. A $\beta$-VAE-ben szereplő béta mindössze egy konstanst jelent, amely azt határozza meg, hogy a teljes veszteség kiszámításnál a két komponenst milyen súllyal számoljuk, egészen konkrétan a rekonstrukciós veszteségnek mindig $1$, a KL divergenciának pedig $\beta$ a súlya. A veszteség függvény tehát egy $\beta$ szorzóval kiegészül:
+$$ \mathbb{E}_{q_\phi(z|x)} [\log p_\phi(x|z)] + \beta D_{KL}(q_\phi(z|x)||p_\phi(z))$$
+A rendes VAE hálók tehát valójában $\beta=1$ paraméterű $\beta$-VAE-k.
 
 A rekonstrukciós veszteség és a KL divergencia két egymásnak ellentétes erőhatásként képzelhető el a látens tér pontjaira nézve, ahol a rekonstrukciós veszteség célja az, hogy a pontok minél inkább távolodjanak az origótól (ezért egymástól is), így könnyebben megkülönböztethetőek legyenek a generálásnál, a KL divergencia pedig éppen az origó felé mozgatja azokat, hogy a térben kevés olyan térrész legyen ami betöltetlen. A $\beta$ paraméter ennek a két tendenciának az egymáshoz viszonyított erősségét szabályozza.
 
-A gyakorlati tapasztalat azt mutatja, hogy az $1$-től eltérő $\beta$-k sok esetben javítanak az eredményeken.
+A gyakorlati tapasztalat azt mutatja, hogy a $\beta$ paraméter növelése javítja a látens tér reprezentációját, cserébe viszont rontja a rekonstrukciót.
 
 \chapter{A feladat leírása}
 
 A dolgozatban különböző VAE implementációkat tesztelünk egy bizonyos Dsprite adathalmazon (lásd később). Megvizsgáljuk, hogy a háló különböző paramétereinek változtatása, mint például (learning rate, látens tér dimenziója, béta hiperparaméter) milyen hatással van a veszteség függvényekre és a rekonstrukcióra.
 
-Továbbá megnézzük azt is, hogy az adathalmazon elvégzett transzformációk (például a képen lévő alakzat eltolása, forgatása) hogyan képződnek le a látens térbe. Ugyanis, ha tudjuk a látens-térben és az adathalmazon vett transzformációk egymáshoz való viszonyát, akkor képesek vagyunk kondicionálisan is adatot generálni. Ez azt jelenti, hogy nem csak véletlen adatokat tudunk generálni a VAE hálóval, hanem generálandó adat bizonyos tulajdonságait explicit meg tudjuk adni a generáláskor (például, hogy hol helyezkedjen el a képen belül az alakzat).
+Továbbá megnézzük azt is, hogy az adathalmazon elvégzett transzformációk (a képen lévő alakzat eltolása) hogyan képződnek le a látens térbe. Ugyanis, ha tudjuk a látens-térben és az adathalmazon vett transzformációk egymáshoz való viszonyát, akkor képesek vagyunk kondicionálisan is adatot generálni. Ez azt jelenti, hogy nem csak véletlen adatokat tudunk generálni a VAE hálóval, hanem generálandó adat bizonyos tulajdonságait explicit meg tudjuk adni a generáláskor (például, hogy hol helyezkedjen el a képen belül az alakzat).
 
 \section{Dsprite adathalmaz}
 
 A kísérletekhez használt adatokat a Dsprite adathalmazból vesszük, mely a GitHubon szabadon elérhető, letölthető.
 
-Az Dsprite egy úgynevezett szintetikus adathalmaz, ami azt jelenti, hogy az adatai nem a valóságból származnak, hanem külön erre a célra lettek legenerálva egy másik programmal. Maguk az adatok egészen pontosan $64\times64$ pixel felbontású képek, melyeken különböző alakzatok sokféle elforgatásban, eltolásban és méretben szerepelnek. Az adathalmaz továbbá címkézve is van, tehát minden képhez tartozik a rajta szereplő alakzat pontos leírása, egészen konkrétan:
+A Dsprite egy úgynevezett szintetikus adathalmaz, ami azt jelenti, hogy az adatai nem a valóságból származnak, hanem külön erre a célra lettek legenerálva egy másik programmal. Maguk az adatok egészen pontosan $64\times64$ pixel felbontású képek, melyeken különböző alakzatok sokféle elforgatásban, eltolásban és méretben szerepelnek. Az adathalmaz továbbá címkézve is van, tehát minden képhez tartozik a rajta szereplő alakzat pontos leírása, egészen konkrétan:
 
 \begin{itemize}
   \item típus: az alakzat formája ($3$ féle lehet: négyzet, ellipszis, szív)
@@ -374,6 +381,16 @@ Kép/Adat & Alak & Méret & Orientáció & Pozíció $(x,y)$ \\
 \end{figure}
 
 Ezen a ponton felmerülhet a kérdés, hogy miért foglalkozunk azzal, hogy az adatok mellé milyen extra információ (címke) párosul az adathalmazban, amikor korábban már láttuk, hogy az autoencoderek és VAE-k esetén pusztán a címkézetlen adatokat használjuk. Valóban, sem a hálók tanításhoz, sem a kiértékelésükhöz nem fogjuk használni ezeket a csatolt tulajdonságokat, azonban nem állunk meg azon a ponton ahol a VAE. A dolgozatban nem csupán adatokat generálunk a megadott adathalmaz eloszlásából, hanem szeretnénk megérteni a létrejött látens teret.
+
+\section{Reprezentáció tanulás}
+
+A reprezentáció tanulás célja, hogy egy olyan látens ponthalmazzá képezze le az adathalmazt, amely elősegíti az adatok rejtett attributumainak feltárását. Erre természetesen akkor van szükség, ha az adathalmaz címkézetlen. Ha például az adathalmazunk kutyákat és macskákat ábrázoló képekből áll, akkor a cél az, hogy a háló látens terében jól elkülönüljenek egymástól a két állatfajhoz tartozó látens reprezentációk.
+
+A mi dolgozatban az a célunk, hogy az adathalmazból kinyerjük a képeken található alakzatok geometriai pozíciójára vonatkozó "rejtett" (mivel a címkéket nem használjuk a tanításhoz) információt, vagyis, hogy a hálónk olyan látens reprezentációkat hozzon létre a különböző képekhez, amelyekből következtethetünk a pozícióra.
+
+\section{Disentanglement}
+
+A disentanglement feladata az, hogy a reprezentáció tanulás során felismert attributumok a lehető legegyszerűbben formában jelenjenek meg a látens térben. Az ideális cél az, hogy minden látens neuron pontosan egy adat-tulajdonságért feleljen. Ebben az esetben, ha egy neuron értékét változtatjuk, akkor az kizárólag a hozzá tartozó tulajdonságot változtatja a generált adatban.
 
 \chapter{Megvalósítás}
 
@@ -433,15 +450,16 @@ verbose	2
 weights size_loss|1,variance_loss|1
 \end{python}
 
+
 \subsection{Az általunk vizsgált paraméterek ismertetése}
 
 \begin{itemize}
-  \item Tanítási idő (\pythoninline{nb_epoch}): A teljes tanító adathalmazon annyiszor tanítjuk be a hálót, amennyi az epoch-ok száma. Azért van szűkség egynél több epoch-ra, mert a tanítási rátát szándékosan alacsonyra állítjuk, ezért a súlyoknak többszöri frissítésre van szűkségük, hogy elérjék az optimumot.
+  \item Tanítási idő (\pythoninline{nb_epoch}): A teljes tanító adathalmazon annyiszor tanítjuk be a hálót, amennyi az epoch-ok száma. Azért van szükség egynél több epoch-ra, mert a tanítási rátát szándékosan alacsonyra állítjuk, ezért a súlyoknak többszöri frissítésre van szükségük, hogy elérjék az optimumot.
   \item Tanítási ráta (\pythoninline{lr}): Annak a mértéke, hogy a súlyokat milyen mértékben változtatjuk ahhoz képest, hogy a backprogapation szerint mennyit kéne csökkenteni rajtuk az adott pillanatban. Ha a súly változtatás függvénye csak $ w_{new} =  w_{old} + b_{error} * a_{activation}$ lenne, akkor minden alkalommal túl sokat javítanánk a súlyokon, és a veszteség függvény értéke nagyon lassan csökkenne, vagy akár divergálna (lásd. \ref{para}.~ábra). Ezért kell a végén alkalmazunk még egy $lr$ tényezőt.
   \item Súly felejtés (\pythoninline{encoder_wd} és \pythoninline{decoder_wd} (weight decay)): Minden batch-ben ezzel a mértékkel csökken az összes súly értéke. Minél nagyobb az értéke annál jobban segíti a háló regularizációját (az output mennyire érzékeny az input kismértékű megváltozására). Képek esetén például általában nem kívánatos működés, ha az input egy pixelének változása óriási változást eredményez az outputon. Külön-külön beállítható az encoderre és decoderre.
   \item $\beta$ hiperparaméter  (\pythoninline{weights}): A rekonstrukciós veszteség és KL divergencia szignifikanciájának aránya.
   \item Látens tér dimenziója (\pythoninline{latent_dim}): Az autoencoder szűk keresztmetszetének mérete. Ennyi neuronnal kell a hálónak reprezentálnia az adatokat.
-  \item Háló architektúrája (\pythoninline{encoder} és \pythoninline{decoder}): A háló felépítésének típusa. Korábban tárgyaltunk erre két lehetőséget: a Súrú és Konvolúciós hálókat.
+  \item Háló architektúrája (\pythoninline{encoder} és \pythoninline{decoder}): A háló felépítésének típusa. Korábban tárgyaltunk erre két lehetőséget: a Sűrű és Konvolúciós hálókat.
 \end{itemize}
 
 A tanítás végeztével az eredmények a keretrendszer működése szerint az .ini fájlban megadott \pythoninline{outputdir} mappába kerülnek\newline (a fenti példában \pythoninline{pictures/beta_vae_tuned}). Ebben a directoryban a program eltárol egy ,,biztonság'' másolatot (\pythoninline{all_params.ini}) a .ini fájlról, hogy a futtatás után is láthassuk, milyen hálót tanítottunk. Eltáródik továbbá magának a hálónak az architektúrája az \pythoninline{encoder.json} és \pythoninline{generator.json} fájlokban (közvetlenül ezt használja a program egy háló beolvasásához). Természetesen azt is el kell menteni, hogy mi lett a tanítás eredménye, vagyis a háló éleinek végleges súlyait. Ezeket a \pythoninline{encoder.h5} és \pythoninline{generator.h5} fájlokban tároljuk el. A háló utólagos kiértékelése és korábban ismeretlen adatokra futtatása esetén a program ezekből a fájlokból olvassa be és építi fel a hálót.
@@ -490,41 +508,60 @@ Az iménti két képen a háló autoencoder jellegét validálhattuk szemrevéte
 \end{center}
 \end{figure}
 
+\subsection{Eredmények feldolgozása és kiértékelése}
+
+Az eddigiekben bemutatott keretrendszert az MTA Rényi Alfréd Matematikai Kutatóintézet munkatársai készítették, a dolgozatban prezentált eredmények előállításához mindössze eszközként használtam.
+
+A saját kontribúcióm többek között a Dsprite adatbázis integrálása volt a keretrendszerbe, amelyhez egy mintavételező programot is írtam, hogy a tanításhoz szükséges adatmennyiséget csökkentsem, erre azonban végül nem volt szükség, mert a hálót nem terhelte meg nagyon (nem tartott sokáig a tanítás) a teljes adathalmaz sem, habár ehhez az epoch számot csökkenteni kellett. 
+
+Az általam írt kód nagy része azonban egy külön Python fájlban (\pythoninline{lookup.py}) összpontosul, amely a későbbiekben tárgyalt metrikák kiszámolását végzi. Ehhez feldolgozza az adathalmazt és lehetőséget nyújt az adatok igény szerinti elérésére, például képes visszaadni egy paraméterben megadott típusú, eltolású, orientációjú és méretű alakzatot árbázoló képet, amelyhez az adathalmaz felépítéséből adódóan nincs szükség keresésre, explicit kiszámolható az adathoz tartozó index. Ezt felhasználva képes visszaadni egy alakzathoz az összes lehetséges eltolását is, amit közvetlenül a metrikák kiszámolásához használ fel.
+
+A program továbbá be tud olvasni a fent említett fájlokból korábban betanított modelleket, és ezeket ki is tudja értékelni az adathalmazból kiválsztott különböző részhalmazokon. A háló futtatásának végeredményét, többek között a különböző veszteségeket  a konzolra írja ki (amelyet egy log fájlba mentünk a program futtatása közben). Ehhez hasonlóan a futtatás közben generálódó látens ponthalmaz alapján képes meghatározni a metrikáinkat, melyeket ugyanúgy a konzolra iratunk ki. A kísérleteknél látható veszteség függvények pontjai egy-egy ilyen kiemenetből származnak, egy ilyen grafikont több háló határoz meg, ezért ezeket egy külön programmal (\pythoninline{graph.py}) összegzünk, majd rajzounk ki. Azon grafikonokat melyek egy-egy hálót jellemeznek (mint például a \ref{m3D} vagy \ref{b4-splice}.~ábrák), azonban ez a program rajzolja ki.
+
+A kísérletek elvégzéséhez számos hálót kellett betanítani, melyet nem egyesével tettem meg, hanem bash scriptekkel automatizáltam a hálók egymás után való tanítását. Ennek működése az \pythoninline{.ini} fájlok (melyek egyértelműen leírnak egy hálót) paramétereinek változtatásán alapszik. Egy script legenerálja az összes háló \pythoninline{.ini} fájlját, majd egy másik script végig iterál az összesen és mindegyik alapján elkészít és betanít egy hálót (a \pythoninline{lookup.py} pedig ezeken a betanított hálókon fut). 
+
+
 \subsection{Futásidő}
 
-A neurális hálók tanítás általánosságban véve egy lassú folyamat, azonban (a batchek használata miatt) lehetőség nyílik nagymértékű párhuzamosításra, ezért a legtöbb esetben grafikus kártyákat használnak erre a célra. A dolgozatban prezentált hálókat is mind GPU-kon, Nvidia GTX 1080 Ti kártyákon tanítottam, melyekhez az MTA Rényi Alfréd Matematikai Kutatóintézet biztosított hozzáférést. Ezek jelenleg a legnagyobb teljesítményű kereskedelmi célra gyártott grafikus kártyák közé tartoznak, azonban egy-egy háló betanítása így is megközelítőleg 1 óráig tartott rajtuk.
+A neurális hálók tanítás általánosságban véve egy lassú folyamat, azonban (a batchek használata miatt) lehetőség nyílik nagymértékű párhuzamosításra, ezért a legtöbb esetben grafikus kártyákat használnak erre a célra. A dolgozatban prezentált hálókat is mind GPU-kon, Nvidia GTX 1080 Ti kártyákon tanítottam, melyekhez az MTA Rényi Alfréd Matematikai Kutatóintézet biztosított hozzáférést. Ezek jelenleg a legnagyobb teljesítményű magáncélokra gyártott grafikus kártyák közé tartoznak, azonban egy-egy háló betanítása így is megközelítőleg 1 óráig tartott rajtuk.
 
 \section{Látens reprezentációk strukturáltságának\\ számszerűsítése}
 
-Egy variational autoencoderrel, amivel dolgozunk képesek vagyunk az input adathalmaz eloszlásából véletlen adatokat generálni. Ez a VAE hálók rendeltetés szerű működése. A mi célunk az, hogy az alakzatokon végzett transzformációk a látens térben is strukturált módon megjelenjenek.
+Egy variational autoencoderrel, amivel dolgozunk képesek vagyunk az input adathalmaz eloszlásából véletlen adatokat generálni. Ez a VAE hálók rendeltetésszerű működése. A mi célunk az, hogy az alakzatokon végzett transzformációk a látens térben is strukturált módon megjelenjenek.
 
-Ezen a ponton használjuk fel az adathalmaz címkéit, tehát hogy valójában minden képhez ismerjük a rajta szereplő alakzat teljes transzformációját (pozíció, méret, forgatás). Az adathalmazból így ki tudjuk keresni az összes olyan képet, melyen egy alakzat, egy forgatásban és egy méretben szerepel, vagyis annak az alakzatnak az összes eltolását. Ezt összesen $32\times32$ adatból álló képhalmazt nevezzük $Q$-nak. A következőkben azt vizsgáljuk, hogy azon vektorok a látens térben, melyekből ezek a képek generálódnak, hogy helyezkednek el. Ez pedig, ha a generátor jól működik, akkor ekvivalens azzal, hogy hol helyezkednek el azok a vektorok, melyeket az encoder előállít a képekből.
+Ezen a ponton használjuk fel az adathalmaz címkéit, tehát hogy valójában minden képhez ismerjük a rajta szereplő alakzat teljes transzformációját (pozíció, méret, forgatás). Az adathalmazból így ki tudjuk keresni az összes olyan képet, melyen egy alakzat, egy forgatásban és egy méretben szerepel, vagyis annak az alakzatnak az összes esltolását. Ezt összesen $32\times32$ adatból álló képhalmazt nevezzük $Q$-nak. A következőkben azt vizsgáljuk, hogy azon vektorok a látens térben, melyekből ezek a képek generálódnak, hogy helyezkednek el. Ez pedig, ha a generátor jól működik, akkor ekvivalens azzal, hogy hol helyezkednek el azok a vektorok, melyeket az encoder előállít a képekből.
 
-Az alakzatok összes lehetséges eltolását két egymástól független paraméterrel le tudjuk írni: az $x$ és $y$ pozíciókkal. Azt szeretnénk látni, hogy a látens térben is leírhatóak két koordinátával, méghozzá egy az adathalmazhoz hasonló négyzetrácsot alkotnak a látens vektorok is. Az ideális természetesen az lenne, ha a látensvektor $1-1$ koordinátája egy az egyben megfeleltethető lenne $x$-nek és $y$-nak, azonban ezt nehéz feladat kikényszeríteni. Csak annyit valósítunk meg, hogy a $Q$ halmaz egy 2 dimenziós négyzetrácsra képződjön le a látens térbe. 
+Az alakzatok összes lehetséges eltolását két egymástól független paraméterrel le tudjuk írni: az $x$ és $y$ pozíciókkal. Azt szeretnénk látni, hogy a látens térben is leírhatóak két koordinátával, méghozzá egy az adathalmazhoz hasonló négyzetrácsot alkotnak a látens vektorok is. Az ideális természetesen az lenne, ha a látensvektor $1-1$ koordinátája egy az egyben megfeleltethető lenne $x$-nek és $y$-nak, azonban ezt nehéz feladat kikényszeríteni. Csak annyit valósítunk meg, hogy $Q$ halmaz egy olyan strukturált ponthalmazzá képződjön a látenst térbe, ahol $x$ és $y$ változtatása jól kivehető. A paraméterek ilyen módon való elkülönítést disentanglementnek nevezik.
 
-Annak számszerűsítésére, hogy a látens ponthalmaz mennyire áll közel egy négyzetrácshoz két metrikát is használunk:
+Annak számszerűsítésére, hogy a látens ponthalmaz mennyire strukturált három metrikát is vizsgáltunk, ezek közül azonban csak az első kettő bizonyult hatékony mérőszámnak:
 \begin{itemize}
   \item PCA metrika
   \item Átlagos szög metrika
   \item Párhuzamosság metrika
 \end{itemize}
 
+A metrikák pontosításának érdekében, az értékeket nem csupán egyetlen $Q$ halmazra állapítjuk meg, hanem több véletlenszerűre,   majd az eredményeket átlagoljuk. Itt a véletlenszerű $Q$ halmaz alatt azt értjük, hogy az eltolás alapjául szolgáló alakzat véletlenszerű. Ez közös jellemzője minden metrikánknak.
+
 \subsection{PCA metrika}
 
-Abból indulunk ki, hogy egy négyzetrács alapvető feltétele, hogy az
-azonos koordinátájú pontjai egyenest alkotnak. A metrika valójában ezen
-pontvektorok egyenességét méri, és ezek átlaga lesz a négyzetrácsra
-vonatkozó általános metrika.
+Abból indulunk ki, hogy egy négyzetrács alapvető feltétele, hogy az egy attribútum változtatásától eltekintve azonos koordinátájú pontjai egyenest alkotnak.  A metrika valójában ezen pontvektorok egyenességét méri, és ezek átlaga lesz a négyzetrácsra vonatkozó általános metrika.
 
-A PCA (Principal component analysis) procedúrával (mely a sklearn Python modulban elérhető) egy pontvektort levetítünk egy $1$ dimenziós egyesre, úgy hogy a vetítéssel járó információ (százalékos) $\ell$ veszteség minimális legyen. Ha ennek az ellentétét vesszük tehát $1-\ell$ mennyiséget, az azt mutatja, hogy a vetítést megelőző és azt követő ponthalmaz százalékosan mennyire hasonlít egymásra. Ez ez lesz a metrikánk az egyenesekre nézve. Ha például már a teljes pontvektor egyenest alkot a látens térben is, akkor a metrika $1$ lesz.
+A PCA (Principal component analysis) procedúrával (mely a sklearn Python modulban elérhető) egy ponthalmazt levetítünk egy $1$ dimenziós egyesre, úgy hogy a vetítéssel járó információ (százalékos) $\ell$ veszteség minimális legyen. Ha ennek az ellentétét vesszük tehát $1-\ell$ mennyiséget, az azt mutatja, hogy a vetítést megelőző és azt követő ponthalmaz százalékosan mennyire hasonlít egymásra. Ez ez lesz a metrikánk az egyenesekre nézve. 
+
+Egészen konkrétan az történik, hogy a PCA veszi az eredeti és a vetített pont távolság-négyzetét, ezeket összegzi az összes pontra, és megkeresi azt a merőleges vetítést, amely minimalizálja ezt a mennyiséget, azaz a veszteséget.
+Ha például már a teljes ponthalmaz egyenest alkot a látens térben is, akkor a metrika $1$ lesz.
 
 A négyzetrácsra vonatkozó metrika ezen egyenesek metrikáinak átlaga lesz, ahol az $x$ és $y$ orientációjú egyeneseket nem különböztetjük meg az átlagolás szempontjából.
+
+Ez a metrika tehát a tökéletesen strukturált ponthalmazokra $1$, a tökéletesen strukturálatlan ponthalmazokra pedig $0$ értéket ad.
 
 \subsection{Átlagos szög metrika}
 
 A PCA metrikához hasonlóan ezen metrika esetében is az négyzetrácsot alkotó egyeneseknek egyenes mivoltát mérjük. Az átlagos szög metrikánál egyszerűen vonalt alkotó szakaszok által bezárt szögek átlaga lesz az egyenest jellemző mérőszám. 
 
 Az általános, négyzetrácsot leíró metrika pedig a PCA-hoz hasonlóan az egyenes metrikák átlaga lesz.
+
+Ez a metrika tehát a tökéletesen strukturált ponthalmazokra $0$ értéket ad és a strukturálatlanság mértékével növekszik, éppen a PCA metrikával ellentétes irányban.
 
 \subsection{Párhuzamosság metrika}
 
@@ -597,11 +634,35 @@ A kísérletekben tehát egy-egy paramétert változtatunk, a többit viszont v�
   \item Háló architektúrája: konvolúciós
 \end{itemize}
 
+\subsection{Konvolúciós architektúra hatása}
+
+Az  konvolúciós kifejezetten képek feldolgozására alkalmasak, azonban elméletben használhatnánk sűrű hálókat is, ezek azonban mind a disentanglement, mind a rekonstrukciós feladatokban rosszabb teljesítménnyel működnek. 
+
+A \ref{3D-dense}.~ábrán látható látens tér egy sűrű hálóhoz tartozik, és azt látjuk rajta, hogy habár a hasonló pozíciójú (pont színezésű) alakzatokhoz hasonló látens koordináták tartoznak, az ábra strukturáltsága nem közelíti meg a \ref{3D-conv}.~ábrán látható konvolúciósét.
+
+Ezen előzetes eredmények alapján a további kísérleteinket kizárólag konvolúciós hálókkal végeztük.
+
+\begin{figure}[h!]
+\begin{center}
+  
+  \includegraphics[width=\linewidth]{metrics/3D-dense.png}
+  \caption{Sűrű hűló látens tere}\label{3D-dense}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+  
+  \includegraphics[width=\linewidth]{metrics/3D-epoch18.png}
+  \caption{Sűrű hűló látens tere}\label{3D-conv}
+\end{center}
+\end{figure}
+
 \subsection{Tanulási idő hatása}
 
-Ebben a kísérletben azt vizsgáltuk, hogy a tanítási idő miként hat a háló látens terének strukturáltságára. Összesen nyolcféle hálót teszteltünk, melyek kizárólag abban különböztek, hogy hány epoch-ig tartott a tanításuk. Ezek az epoch-hok a: $3, 6, 9, 12, 15, 18, 21, 24$. Ennek megvalósítására két megoldás is lehetséges: egy háló tanítását $3$ epoch-onként félbeszakítjuk és kimentjük a releváns adatokat, vagy $8$ különböző hálót tanítunk a kezdettől, és mindegyiket más-más epoch számig futtatunk. Az alábbi adatok az utóbbi megvalósításával keletkeztek.
+Ebben a kísérletben azt vizsgáltuk, hogy a tanítási idő miként hat a háló látens terének strukturáltságára. Összesen nyolcféle hálót teszteltünk, melyek kizárólag abban különböztek, hogy hány epoch-ig tartott a tanításuk. Ezek az epoch-ok a: $3, 6, 9, 12, 15, 18, 21, 24$. Ennek megvalósítására két megoldás is lehetséges: egy háló tanítását $3$ epoch-onként félbeszakítjuk és kimentjük a releváns adatokat, vagy $8$ különböző hálót tanítunk a kezdettől, és mindegyiket más-más epoch számig futtatunk. Az alábbi adatok az utóbbi megvalósításával keletkeztek.
 
-A \ref{epoch-loss}.~ábrán láthatjuk, hogy a zajtól eltekintve a $15$ és $24$ közötti epoch számok bizonyulnak a legkevesebb veszteséggel járó paraméterezésnek. Érthető az is, hogy a rövid ($3-12$ epoch-os) tanítás még nem elegendő idő a hálónak arra, hogy hatékonyan rekonstruáljon.
+A \ref{epoch-loss}.~ábrán láthatjuk, hogy a zajtól eltekintve a $15$ és $24$ közötti epoch számok bizonyulnak a legkevesebb veszteséggel járó paraméterezésnek. Érthető az is, hogy a rövid ($3-12$ epoch-os) tanítás még nem elegendő idő a hálónak arra, hogy hatékonyan rekonstruáljon. Lényegében tehát annyi látszik az ábrán, hogy az epoch szám növelése javítja a visszaállítési képességet.
 
 \begin{figure}[h!]
 \begin{center}
@@ -637,7 +698,9 @@ A két metrika és veszteség alakulását tekintve tehát a $18$ epochig való 
 
 \subsection{Tanulási ráta hatása}
 
-Ebben a kísérletben a tanítási rátát változtatjuk.
+A tanulási ráta változtatása esetében korábban nem tapasztalt problémák merültek fel. Itt nem az történt, hogy a többszöri futtatás hiánya zajos adatot eredményezett, hanem egyszerűen egy-két paramétert leszámítva az összesre extrém méretű adatokat kaptunk, melyekből nem lehetett metrikákat számolni (egyes koordináták túlságosan nagyok lettek), sőt a nagyobb tanulási ráták esetén még a veszteség függvény is a végtelenbe divergált.
+
+Ez a jelenség természetesen ismert: ha túl nagyra választjuk a tanítási rátát akkor előfordulhat, hogy a súlyokon minden batch-ben túl sokat változtatunk, ezért a veszteség függény alternálni fog az optimum körül, ahelyett, hogy folyonosan közelítené meg. Az ilyen módon helyes és helytelen viselkedés közti különbséget illusztrálja a \ref{para}.~ábra. Előfordulhat azonban még egy ennél rosszabb lehetőség is, amikor a veszteség függvény még csak nem is közelíti az optimumot, hanem a végtelenbe divergál. A $0.1, 0.3$ paraméterezésű hálóink minden bizonnyal ezért eredményeztek nagyon nagy veszteségeket.
 
 \begin{figure}[h!]
   
@@ -682,13 +745,13 @@ Láthatjuk tehát -- legalábbis a szintetikus adathalmazunkra -- , hogy a súly
 
 \subsection{$\beta$ hiperparaméter hatása}
 
-A hagyományos VAE hálókban nem szerepel $\beta$ paraméter, csak a kiterjesztett $\beta$VAE hálókban. Emiatt azonban nem kell teljesen megváltoztatni az alap architektúrát, mivel a VAE egy speciális változata a $\beta$VAE-nak.
+A hagyományos VAE hálókban nem szerepel $\beta$ paraméter, csak a kiterjesztett $\beta$-VAE hálókban. Emiatt azonban nem kell teljesen megváltoztatni az alap architektúrát, mivel a VAE egy speciális változata a $\beta$-VAE-nak.
 
 A $\beta$ paraméter -- amint azt már korábban említettünk -- azt határozza meg, hogy a látens térben rekonstrukció origóból kifele mutató és a KL divergencia origóba befelé mutató húzó erejének mi az aránya. Ha $\beta>1$ akkor a KL divergencia, ha $\beta<1$, akkor a rekonstrukciós erő dominál ($\beta=1$, akkor pedig egy hagyományos VAE hálóról beszélünk).
 
 Ezt a paramétert számos értékre megvizsgáltuk: $0.2$-től $2.0$-ig $0.2$-esével, majd onnantól egyre ritkábban, egészen $100$-ig. A \ref{beta-loss}.~ábrán a rekonstrukciós veszteséget megtekintve azt láthatjuk, hogy lényegében a $\beta$ paraméter növelésével monoton csökken, egyre kisebb mértékben és nagyjából $155$-höz konvergál. 
 
-Ez a viselkedés teljes mértékben megfelel a várakozásoknak, hiszen $\beta$ növelése éppen azt jelenti, hogy a súlyok felülírása egyre kevésbé függ a rekonstrukciós hibától és egyre jobban függ a KL divergenciától. $\beta=40$ érték közelében éri el a háló a maximális veszteséget, tehát ez az a pont, amikor a $\beta$VAE elveszti autoencoder jellegét. Ilyen és ennél magasabb $\beta$ értékek esetén már tehát szinte egyáltalán nem képes a háló rekonstrukcióra.
+Ez a viselkedés teljes mértékben megfelel a várakozásoknak, hiszen $\beta$ növelése éppen azt jelenti, hogy a súlyok felülírása egyre kevésbé függ a rekonstrukciós hibától és egyre jobban függ a KL divergenciától. $\beta=40$ érték közelében éri el a háló a maximális veszteséget, tehát ez az a pont, amikor a $\beta$-VAE elveszti autoencoder jellegét. Ilyen és ennél magasabb $\beta$ értékek esetén már tehát szinte egyáltalán nem képes a háló rekonstrukcióra.
 
 \begin{figure}[h!]
 \begin{center}
@@ -698,7 +761,7 @@ Ez a viselkedés teljes mértékben megfelel a várakozásoknak, hiszen $\beta$ 
 \end{center}
 \end{figure}
 
-Ha egy megfelelő reprezentációt keresünk, akkor természetesen az is szűkséges, hogy az adatokat egyáltalán rekonstruálni képes legyen a háló. Tekintsük meg a \ref{beta-pca}.~ábrán a PCA metrikát minden $\beta$-ra, ahol ugyebár a magas értékeknek tulajdonítunk strukturált látens tereket. Az ábra $\beta$-t ábrázoló tengelye logaritmikus skálázású, tehát a a valóságban a jobb felső négy pontnak nagyságrendbeli eltérése van a középső pontoktól.
+Ha egy megfelelő reprezentációt keresünk, akkor természetesen az is szükséges, hogy az adatokat egyáltalán rekonstruálni képes legyen a háló. Tekintsük meg a \ref{beta-pca}.~ábrán a PCA metrikát minden $\beta$-ra, ahol ugyebár a magas értékeknek tulajdonítunk strukturált látens tereket. Az ábra $\beta$-t ábrázoló tengelye logaritmikus skálázású, tehát a a valóságban a jobb felső négy pontnak nagyságrendbeli eltérése van a középső pontoktól.
 
 A veszteség függvény beláttuk, hogy a nagyon magas $\beta$-k körében értelmetlen vizsgálódni, azonban a PCA metrika mutat két kiugró pontot, mely nagyon jól strukturált látens teret ígér ($\beta=4$ és $\beta=8$ paraméterekre), hiszen megközelítőleg információ veszteség nélkül tudjuk a négyzetrács görbéinek pontjait $10$ dimenzióban egy egyenesre vetíteni (más szóval a PCA metrika majdnem $1$).
 
@@ -772,11 +835,11 @@ $\beta=3$-nál jön el az a pont (a vizsgált $\beta$-k közül), ahol a háló 
 
 $\beta=6$ esetén ennek a tendenciának a folyatása látható, itt már minden képen csak körök láthatóak. Transzformációs képesség szempontjából azonban minden korábbinál jobban viselkedik ez a háló, elég csak a legalsó sorra nézni, ahol szinte egy folytonos átmenet látható $x=1$-től az $x=31$ koordinátáig.
 
-Ez a négy ábra jól mutatja a $\beta$VAE működését, látszik ahogy $\beta$ növelésével egyre csökken a rekonstrukciós képesség, azonban eközben a látens tér egyre strukturáltabb, ezért képes a transzformációkat értelmezni. Az is látható továbbá, hogy a háló többi paraméterei ilyen értékekkel semmilyen $\beta$-ra sem eredményeznek egy olyan hálózatot, amely ezt a két képességet egyszerre teljesítik.
+Ez a négy ábra jól mutatja a $\beta$-VAE működését, látszik ahogy $\beta$ növelésével egyre csökken a rekonstrukciós képesség, azonban eközben a látens tér egyre strukturáltabb, ezért képes a transzformációkat értelmezni. Az is látható továbbá, hogy a háló többi paraméterei ilyen értékekkel semmilyen $\beta$-ra sem eredményeznek egy olyan hálózatot, amely ezt a két képességet egyszerre teljesítik.
 
 
 
-A $\beta$ hiperparaméterrel tehát a VAE és $\beta$VAE hálók esetében mindenképp érdemes foglalkozni, ezzel a paraméterrel lehet finomhangolni azt, hogy mennyit szeretnék elengedni a rekonstrukcióból a tér sarukúráltsága értekében és fordítva. A különböző adathalmazok és felhasználási célok határozzák meg egy-egy konkrét esetben, hogy mennyire érdemes választani $\beta$-t.
+A $\beta$ hiperparaméterrel tehát a VAE és $\beta$-VAE hálók esetében mindenképp érdemes foglalkozni, ezzel a paraméterrel lehet finomhangolni azt, hogy mennyit szeretnék elengedni a rekonstrukcióból a tér sarukúráltsága értekében és fordítva. A különböző adathalmazok és felhasználási célok határozzák meg egy-egy konkrét esetben, hogy mennyire érdemes választani $\beta$-t.
 
 \subsection{Látens tér dimenziójának hatása}
 
@@ -806,17 +869,6 @@ Nézzük meg az átlagos szög metrikánkat is ezekre az adatokra a \ref{ldim-me
 \end{center}
 \end{figure}
 
-\subsection{Konvolúciós architektúra hatása}
-
-Az összes kísérlet során konvolúciós hálókat alkalmaztunk, mivel ezek a hálók kifejezetten képek feldolgozására alkalmasak, azonban elméletben használhatnánk sűrű hálókat is, ezek azonban mind a klasszifikációs, mind a rekonstrukciós feladatokban rosszabb teljesítménnyel működnek. A \ref{3D-dense}.~ábrán látható látens tér egy sűrű hálóhoz tartozik, és azt látjuk rajta, hogy habár a hasonló pozíciójú (pont színezésű) alakzatokhoz hasonló látens koordináták tartoznak, az árba sarukúráltsága nem közelíti meg a konvolúciósakét.
-
-\begin{figure}[h!]
-\begin{center}
-  
-  \includegraphics[width=\linewidth]{metrics/3D-dense.png}
-  \caption{Átlagos szög metrika}\label{3D-dense}
-\end{center}
-\end{figure}
 
 \begin{thebibliography}{9}
 
