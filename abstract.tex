@@ -3,7 +3,12 @@
 %----------------------------------------------------------------------------
 \chapter*{Kivonat}\addcontentsline{toc}{chapter}{Kivonat}
 
-Jelen dokumentum egy diplomaterv sablon, amely formai keretet ad a BME Villamosmérnöki és Informatikai Karán végzõ hallgatók által elkészítendõ szakdolgozatnak és diplomatervnek. A sablon használata opcionális. Ez a sablon \LaTeX~alapú, a \emph{TeXLive} \TeX-implementációval és a PDF-\LaTeX~fordítóval mûködõképes.
+A dolgozatban bemutatjuk a manapság legsikeresebb generatív modelleket, különös hangsúlyt fektetve az autoencoder alapú VAE, illetve $\beta$-VAE architektúrákra, melyek generatív modellként is alkalmazhatóak, de a reprezentáció-tanulásban is komoly jelentőségre tettek szert. Munkánk során különböző metrikák megalkotásával formalizáláljuk és számszerűsítjük, hogy ezen modellek reprezentációi mennyire felelnek meg az ilyen reprezentációk iránt támasztott informális követelményeknek. Ehhez egy szintetikus adathalmazt, a Dsprite-ot használjuk.
+
+A vizsgálathoz szükséges programokat Kerasban, Python nyelven a numpy/scikit-learn/tensorflow/matplotlib könyvtárakra építve implementáljuk, modelleiket pedig nagy teljesítményű grafikus kártyákon futtatjuk. 
+
+Az így felálló keretrendszerrel számos különböző VAE alapú modellt hozunk létre és ezeket reprezentáció szempontjából, saját metrikáink alapján hasonlítjuk össze egymással. Különös hangsúlyt fektetünk a $\beta$-VAE hálók $\beta$ hiperparaméterének reprezentáció-hatására, illetve a rekonstrukciós képesség és a látens tér struktúrájának egymáshoz való viszonyára. A repezentációk személtetéséhez többféle ábrát is generálunk minden modellhez, illetve modell halmazhoz.
+
 \vfill
 
 %----------------------------------------------------------------------------
@@ -11,6 +16,10 @@ Jelen dokumentum egy diplomaterv sablon, amely formai keretet ad a BME Villamosm
 %----------------------------------------------------------------------------
 \chapter*{Abstract}\addcontentsline{toc}{chapter}{Abstract}
 
-This document is a \LaTeX-based skeleton for BSc/MSc~theses of students at the Electrical Engineering and Informatics Faculty, Budapest University of Technology and Economics. The usage of this skeleton is optional. It has been tested with the \emph{TeXLive} \TeX~implementation, and it requires the PDF-\LaTeX~compiler.
+A dolgozatban bemutatjuk a manapság legsikeresebb generatív modelleket, különös hangsúlyt fektetve az autoencoder alapú VAE, illetve $\beta$-VAE architektúrákra, melyek generatív modellként is alkalmazhatóak, de a reprezentáció-tanulásban is komoly jelentőségre tettek szert. Munkánk során különböző metrikák megalkotásával formalizáláljuk és számszerűsítjük, hogy ezen modellek reprezentációi mennyire felelnek meg az ilyen reprezentációk iránt támasztott informális követelményeknek. Ehhez egy szintetikus adathalmazt, a Dsprite-ot használjuk.
+
+A vizsgálathoz szükséges programokat Kerasban, Python nyelven a numpy/scikit-learn/tensorflow/matplotlib könyvtárakra építve implementáljuk, modelleiket pedig nagy teljesítményű grafikus kártyákon futtatjuk. 
+
+Az így felálló keretrendszerrel számos különböző VAE alapú modellt hozunk létre és ezeket reprezentáció szempontjából, saját metrikáink alapján hasonlítjuk össze egymással. Különös hangsúlyt fektetünk a $\beta$-VAE hálók $\beta$ hiperparaméterének reprezentáció-hatására, illetve a rekonstrukciós képesség és a látens tér struktúrájának egymáshoz való viszonyára. A repezentációk személtetéséhez többféle ábrát is generálunk minden modellhez, illetve modell halmazhoz.
 \vfill
 
