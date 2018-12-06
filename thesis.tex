@@ -162,7 +162,7 @@ A felelősséget végül nem a súlyokon, hanem a neuronokon fogjuk realizálni.
 
 A neuronokon azonban nincs mit megváltoztatni, csak a súlyok és biasek változtatása lehetséges. A súlyok megváltoztatására a képlet az alábbi:
 $$ w_{new} =  w_{old} + b_{act-error} \cdot f'(b_{act}) \cdot a_{act} \cdot lr $$
-ahol $w$-vel jelölt értékekkel, a megváltoztatás előtti, illetve utáni súlyokat jelöljük, $a$ az (irányított) él kezdőpontja, $b$ pedig a végpontja, $lr$ pedig a tanulás sebessége. $b_{act-error}$ a backpropagation során kiszámolt neuron felelőssége a hibában, $f$ függvény pedig az aktivációs függvény (a képletben a deriváltja szerepel).
+ahol $w$-vel jelölt értékekkel, a megváltoztatás előtti, illetve utáni súlyokat jelöljük, $a$ az (irányított) él kezdőpontja, $b$ pedig a végpontja (és $b_{act}$ az aktivációs függvény előtt értendő aktiváció), $lr$ pedig a tanulás sebessége. $b_{act-error}$ a backpropagation során kiszámolt neuron felelőssége a hibában, $f$ függvény pedig az aktivációs függvény (a képletben a deriváltja szerepel). 
 
 A backpropagationt több input-output párra is el kell végezzük, ekkor viszünk be információt a rendszerbe arról, hogy mely párokat tartunk helyesnek, és végül az algoritmus ebből fogja ezt a véges tudását általánosítani bármilyen -- korábban nem látott -- inputra. Azt a folyamatot amikor az összes kívánt párra lefuttatjuk a backpropagationt \emph{epochnak} nevezzük. 
 
@@ -234,6 +234,8 @@ Pooling rétegeket általában két konvolúciós réteg között szoktak haszn�
 Az autoencoderek olyan speciális neurális hálók, amelyek képesek az input rétegükre érkező adatot egy rövid kóddá tömöríteni (\emph{encode}), majd abból a kódból az eredeti inputot visszaállítani (\emph{decode}). Ezt a két funkciót egyetlen hálóval valósítjuk meg, azonban a hálón belül jól elkülönül a két rész: a rétegek első fele végzi el a kódolást, a második fele pedig a dekódolást. Az encodernek folyamatosan csökkennek, a decodernek pedig növekszenek a rétegeik mérete, ahogy ezt a \ref{AE_arch2}.~ábra mutatja. Az encode-olás és decode-olás egymás utáni elvégzése elméletben egy identitás. A tanítás során ezért a kimeneten várt érték maga az input, nincs szükségünk adatpárokra, pusztán kódolandó adatokra. A háló tanításához szükséges hibát tehát a rekonstrukció hatásfoka fogja meghatározni. A veszteségfüggvénye konkrétan az alábbi:
 
 $$ \mathbb{E}_{q_\phi(z|x)} [\log p_\phi(x|z)]$$
+
+Ez lényegében a várt és kapot vektorok távolság-négyzete, vagyis az input és output kép közíti négyzetes hiba. 
 
 A háló ,,közepén'' elhelyezkedő legkisebb méretű réteget reprezentációs vagy látens rétegnek nevezzük, a kiértékelés során az itt megjelenő aktivációs értékek vektora jelenti a kódot. Ez a kód valóban az inputra érkező adatot reprezentálja, hiszen az adatból (az encoderrel) elő tudjuk állítani a kódot, a kódból pedig (a decoderrel) vissza tudjuk állítani az adatot.
 
@@ -323,11 +325,13 @@ A VAE-k másik fő eltérése a hagyományos autoencoderektől, hogy a backpropa
 A hagyományos VAE hálók veszteségfüggvénye az alábbi:
 $$ \mathbb{E}_{q_\phi(z|x)} [\log p_\phi(x|z)] + D_{KL}(q_\phi(z|x)||p_\phi(z))$$
 
+Ebben a veszteségfüggvényben a korábbi rekonstrukciós tag mellett megjelenik a KL divergencia is.
+
 A tanítás végeztével tehát a látens térből bárhonnan választhatunk véletlen vektorokat, azokból valósághű adatotokat fog generálni a decoder.
 
 \section{Módosított variational autoencoderek ($\beta$-VAE)}
 
-A $\beta$-VAE-k \cite{bvae} nagyon hasonlóak a rendes VAE hálókhoz, mindössze a veszteségfüggvényben különböznek egymástól. A VAE-k esetében ez a veszteség két komponensből áll: a rekonstrukciós veszteségből és a KL divergenciából. A $\beta$-VAE-ben szereplő béta mindössze egy konstanst jelent, amely azt határozza meg, hogy a teljes veszteség kiszámításnál a két komponenst milyen súllyal számoljuk, egészen konkrétan a rekonstrukciós veszteségnek mindig $1$, a KL divergenciának pedig $\beta$ a súlya. A veszteségfüggvény tehát egy $\beta$ szorzóval kiegészül:
+A $\beta$-VAE-k \cite{bvae} nagyon hasonlóak a rendes VAE hálókhoz, mindössze a veszteségfüggvényben különböznek egymástól. A VAE-k esetében ez a veszteség két komponensből áll: a rekonstrukciós veszteségből és a KL divergenciából. A $\beta$-VAE-ben szereplő béta mindössze egy konstanst jelent, amely azt határozza meg, hogy a teljes veszteség kiszámításnál a két komponenst milyen súllyal számoljuk, egészen konkrétan a rekonstrukciós veszteségnek mindig $1$, a KL divergenciának pedig $\beta$ a súlya. A veszteségfüggvény tehát egy $\beta$ szorzóval egészül ki az alábbi módon:
 $$ \mathbb{E}_{q_\phi(z|x)} [\log p_\phi(x|z)] + \beta D_{KL}(q_\phi(z|x)||p_\phi(z))$$
 A rendes VAE hálók tehát valójában $\beta=1$ paraméterű $\beta$-VAE-k.
 
@@ -562,12 +566,9 @@ A metrikák pontosításának érdekében, az értékeket nem csupán egyetlen $
 
 \subsection{PCA metrika}
 
-Abból indulunk ki, hogy egy négyzetrács alapvető feltétele, hogy az egy attribútum változtatásától eltekintve azonos koordinátájú pontjai egyenest alkotnak.  A metrika valójában ezen pontvektorok egyenességét méri, és ezek átlaga lesz a négyzetrácsra vonatkozó általános metrika.
+Abból indulunk ki, hogy egy négyzetrács alapvető tulajdonsága, hogy az egy attribútum változtatásától eltekintve azonos koordinátájú pontjai egyenest alkotnak.  A metrika valójában ezen pontvektorok egyenességét méri, és ezek átlaga lesz a négyzetrácsra vonatkozó általános metrika.
 
-A PCA (Principal component analysis) procedúrával (mely a sklearn Python modulban elérhető) egy ponthalmazt levetítünk egy $1$ dimenziós egyesre, úgy hogy a vetítéssel járó információ (százalékos) $\ell$ veszteség minimális legyen. Ha ennek az ellentétét vesszük tehát $1-\ell$ mennyiséget, az azt mutatja, hogy a vetítést megelőző és azt követő ponthalmaz százalékosan mennyire hasonlít egymásra. Ez ez lesz a metrikánk az egyenesekre nézve. 
-
-Egészen konkrétan az történik, hogy a PCA veszi az eredeti és a vetített pont távolság-négyzetét, ezeket összegzi az összes pontra, és megkeresi azt a merőleges vetítést, amely minimalizálja ezt a mennyiséget, azaz a veszteséget.
-Ha például már a teljes ponthalmaz egyenest alkot a látens térben is, akkor a metrika $1$ lesz.
+A PCA (Principal Component Analysis) procedúrával (mely a sklearn Python modulban elérhető) egy ponthalmazt levetíthetünk egy 1 dimenziós egyenesre. A PCA által választott vetítés két ekvivalens módon is megfogalmazható: 1. a PCA minimalizálja a négyzetösszegét azoknak a távolságoknak, amelyekkel az egyes pontok a vetítés hatására elmozdulnak. 2. a PCA maximalizálja azt, hogy a vetítés utáni varianciája mekkora az adathalmaznak. A ponthalmaz “egyenességének” egy lehetséges mértéke, hogy mennyi az “explained variance ratio”, azaz hogy hányadára csökkent az adathalmaz varianciája a vetítéstől. Ez a mennyiség $0$ és $1$ közötti, és 1-et akkor vesz fel, ha a ponthalmaz egy egyenesre esik.
 
 A négyzetrácsra vonatkozó metrika ezen egyenesek metrikáinak átlaga lesz, ahol az $x$ és $y$ orientációjú egyeneseket nem különböztetjük meg az átlagolás szempontjából.
 
@@ -585,7 +586,7 @@ Ez a metrika tehát a tökéletesen strukturált ponthalmazokra $0$ értéket ad
 
 Ennél a metrikánál azt számoljuk ki, hogy a vonalak mennyire párhuzamosak egymással, ahelyett, hogy a vonalak egyenességének mértékét vizsgáljuk. 
 
-Ez a mérőszám azonban nem bizonyult hatékonynak, mivel a korábbi két metrikától eltérő eredményeket mutat. A \ref{para2}.~ábrán két grafikon látható, melyek a PCA metrikát vetik össze a Párhuzamosság és Átlagos szög metrikával, az ábrázolt pontok pedig a $32\times32$-es eltolás mátrix vonalait jelölik. Látszik, hogy a PCA és Átlagos szög metrikák lényegében korrelálnak, míg a PCA és Párhuzamos metrikák gyakorlatilagfüggetlenek.
+Ez a mérőszám azonban nem bizonyult hatékonynak, mivel a korábbi két metrikától eltérő eredményeket mutat. A \ref{para2}.~ábrán két grafikon látható, melyek a PCA metrikát vetik össze a Párhuzamosság és Átlagos szög metrikával, az ábrázolt pontok pedig a $32\times32$-es eltolás mátrix vonalait jelölik. Látszik, hogy a PCA és Átlagos szög metrikák lényegében korrelálnak, míg a PCA és Párhuzamos metrikák gyakorlatilag függetlenek.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -900,11 +901,15 @@ Nézzük meg az átlagos szög metrikánkat is ezekre az adatokra a \ref{ldim-me
 
 Az eredményeket tekintve látszik, hogy mely paraméterek milyen mértékben hatottak a reprezentációra. A $\beta$ paraméter megfelelő megválasztásával láttuk, hogy nagyon letisztult látens tereket is kaphatunk. ahol szabad szemmel ráismerhetünk az adathalmaz bizonyos elemeire.
 
-A modellek kiértékelése során számos problémával szembesültem, például azzal, hogy egyetlen betanítás után egy háló meglehetősen zajos eredményeket produkál nem csak a saját metrikáimra nézve, a veszteségfüggvények alapján is. A hálók tanítása során keletkező zajt azonban csak extra teljesítménnyel lehetett volna kiküszöbölni, minden háló többszöri betanításával. Ahol csak tudtam, próbáltam tompítani a zajt sokszori futtatással, majd átlagolással például a metrikák számolásánál minden érték úgy keletkezik, hogy sok különböző alakzatot eltolok, majd a rajtuk kiszámolt metrikákat átlagolom. 
+A modellek kiértékelése során számos problémával szembesültem, például azzal, hogy egyetlen betanítás után egy háló meglehetősen zajos eredményeket produkál nem csak a saját metrikáimra nézve, a veszteségfüggvények alapján is. A hálók tanítása során keletkező zajt azonban csak extra teljesítménnyel lehetett volna kiküszöbölni, minden háló többszöri véletlen inicializációval való futtatásával. Ez tehát egy potenciális javítási lehetőség.
+
+Ahol csak tudtam, próbáltam tompítani a zajt sokszori futtatással, majd átlagolással például a metrikák számolásánál minden érték úgy keletkezik, hogy sok különböző alakzatot eltolok, majd a rajtuk kiszámolt metrikákat átlagolom. 
 
 Egy másik, problémának nem nevezhető jelenség, hogy bizonyos paraméterek teljesen irrelevánsnak bizonyultak a látens tér strukturája szemponjából, pélidául a súly felejtés.
 
 Konvolúciós hálók révén egyéb paraméterek reprezentáció-hatását is meg lehetne vizsgálni: padding, stride, filterek száma, a háló rétegeinek dimenziói és száma.
+
+Tesztelhető lenne ezek mellett az "Understanding disentangling in $\beta$-VAE" \cite{dbvae} publikációban bemutatott módszer is, amely a úgy segíti a disentanglementet, hogy közben a rekonstrukciós képesség nem romlik olyan mértékben, mint a hagyományos $\beta$-VAE esetében.
 
 További lehetőség lenne dolgozatban látott elemzés elvégzése más, akár nem szintetikus adahalmazokon is, mint például a Celeba adathalmaz.
 
@@ -929,6 +934,10 @@ Variational Autoencoder\\
 \url{https://arxiv.org/abs/1606.05908}
 
 \bibitem{bvae}
+Understanding disentangling in $\beta$-VAE\\
+\url{https://arxiv.org/abs/1804.03599}
+
+\bibitem{dbvae}
 Understanding disentangling in $\beta$-VAE\\
 \url{https://arxiv.org/abs/1804.03599}
 
