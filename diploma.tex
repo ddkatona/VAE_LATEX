@@ -20,6 +20,8 @@
 \usepackage{setspace}  % Ettol a tablazatok, abrak, labjegyzetek maradnak 1-es sorkozzel!
 \usepackage[hang]{caption}
 \usepackage{hyperref}
+%\usepackage{natbib}
+%\usepackage[hidelinks]{hyperref}
 \usepackage{array}
 % Default fixed font does not support bold face
 \DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{12} % for bold
@@ -61,6 +63,8 @@ showstringspaces=false            %
 
 % Python for inline
 \newcommand\pythoninline[1]{{\pythonstyle\lstinline!#1!}}
+
+
 
 
 
@@ -183,6 +187,22 @@ aboveskip=10pt}
 \renewcommand{\captionlabelfont}{\small\bf}
 \renewcommand{\captionfont}{\footnotesize\it}
 
+%\usepackage[hyperref=true,backend=biber,dateabbrev=false]{biblatex}
+%\addbibresource{mybib.bib}
+%\usepackage{xcolor}
+%\colorlet{doic}{green!50!black}
+%\colorlet{arxivc}{pink!50!black}
+%\usepackage[hyperref=true,backend=biber,style=numeric]{biblatex}
+%%\usepackage[hidelinks]{hyperref}
+%%\urlstyle{sf}
+%
+%% ARXIV links       
+%\def\arxivtourl#1{http://arxiv.org/abs/#1}      
+%\DeclareFieldFormat{eprint:arxiv}{%
+    %\ifhyperref
+        %{\color{arxivc}\href{\arxivtourl#1}{[arxiv:\nolinkurl{#1}]}}
+        %{\nolinkurl{#1}}}
+
 %--------------------------------------------------------------------------------------
 % Table of contents and the main text
 %--------------------------------------------------------------------------------------
@@ -202,16 +222,19 @@ aboveskip=10pt}
 %\include{chapter1}
 %\include{chapter2}
 %\include{chapter3}
+%\bibliography{mybib}
+
 \include{acknowledgement}
 
 %\listoffigures\addcontentsline{toc}{chapter}{Ábrák jegyzéke}
 %\listoftables\addcontentsline{toc}{chapter}{Táblázatok jegyzéke}
 
-%\bibliography{mybib}
-%\addcontentsline{toc}{chapter}{Irodalomjegyzék}
-%\bibliographystyle{plain}
+
 
 %\include{appendices}
-
+%\bibliography{mybib}
+\addcontentsline{toc}{chapter}{Irodalomjegyzék}
+\include{mybib}
+\bibliographystyle{plain}
 \label{page:last}
 \end{document}

@@ -267,7 +267,7 @@ Jelenleg a GAN-ok a VAE-knél sikeresebb modellcsalád a generatív modellezés 
 
 \subsection{Generative Adversarial Network (GAN)}
 
-A GAN-ok \cite{original GAN}, tehát ahogy korábban már említettük, olyan neurális hálózatok, melyek képesek az input adathalmaz eloszlásából újabb, véletlenszerű adatokat generálni. Ezt -- az autoencoderekhez hasonlóan -- két egymástól funkcionálisan eltérő neurális háló együttes használatával érjük el a GAN esetében. A két hálót \textit{generátornak} és \textit{diszkriminátornak} nevezzük.
+A GAN-ok \cite{original-GAN}, tehát ahogy korábban már említettük, olyan neurális hálózatok, melyek képesek az input adathalmaz eloszlásából újabb, véletlenszerű adatokat generálni. Ezt -- az autoencoderekhez hasonlóan -- két egymástól funkcionálisan eltérő neurális háló együttes használatával érjük el a GAN esetében. A két hálót \textit{generátornak} és \textit{diszkriminátornak} nevezzük.
 
 A generátor feladata, hogy egy véletlenszerű kódból előállítson egy adatot az adathalmaz eloszlásából. A háló inputja tehát egy véletlen zaj, azaz minden input neuronnak egy véletlen értéket adunk meg mind tanításkor, mind kiértékeléskor. Már csak annyi a kérdés, hogy hogyan tudjuk eldönteni az output rétegén megjelenő generált adatról, hogy valóban a kívánt adathalmazból származik-e. Ezen eldöntendő kérdés megválaszolására használjuk a diszkriminátort. A generátor súlyait ezért annak függvényében változtatjuk, hogy a diszkriminátor milyen mértékben tartja valódinak az adatot.
 
@@ -306,7 +306,7 @@ Az utóbbi néhány évben nagy fejlődésen mentek keresztül a GAN-ok. A \ref{
 A variational autoencoderek a GAN-okhoz hasonlóan generatív modellek, azonban a felépítésük -- ahogy a nevükben is szerepel --  nagyban hasonlítanak a hagyományos autoencoderekhez.
 Első ránézésre az autoencoderek is alkalmasnak tűnnek a generálásra, hiszen a decoder komponensük képes egy látens vektorból előállítani egy adatpontot, ezért ha egy korábban ismeretlen látens vektorra futtatjuk a decodert, akkor egy új, de mégis hiteles adatot kapnánk. Ez azonban nem működik, mert az autoencoder látens terében a gyakorlatban bizonyos térrészek teljesen érintetlenül maradnak, így a háló nincs felkészülve arra, hogy a látens tér azon szegmenséből generáljon (decode-oljon) adatot.
 
-Ezt a problémát oldja meg a VAE \cite{original VAE} azzal a trükkel, hogy az encodere nem egy konkrét látens vektort állít elő, mint az adat reprezentációs alakja, hanem egy normális eloszlást. A variational autoencodereknél valójában ez az eloszlás reprezentálja az adatot, ami két vektort jelent: egy várható érték és szórás vektort, melyek koordinátánként értendőek a látens vektorra nézve. A tanítás során tehát a decoder (amit a VAE esetében már generátornak is nevezhetünk) inputja egy véletlenszerű vektor ebből az eloszlásból (lásd \ref{vae}.~ábra).
+Ezt a problémát oldja meg a VAE \cite{original-VAE, VAE} azzal a trükkel, hogy az encodere nem egy konkrét látens vektort állít elő, mint az adat reprezentációs alakja, hanem egy normális eloszlást. A variational autoencodereknél valójában ez az eloszlás reprezentálja az adatot, ami két vektort jelent: egy várható érték és szórás vektort, melyek koordinátánként értendőek a látens vektorra nézve. A tanítás során tehát a decoder (amit a VAE esetében már generátornak is nevezhetünk) inputja egy véletlenszerű vektor ebből az eloszlásból (lásd \ref{vae}.~ábra).
 
 \begin{figure}[h!]
 \begin{center}
@@ -484,7 +484,7 @@ weights size_loss|1,variance_loss|1
   \item Háló architektúrája (\pythoninline{encoder} és \pythoninline{decoder}): A háló felépítésének típusa. Korábban tárgyaltunk erre két lehetőséget: a Sűrű és Konvolúciós hálókat.
 \end{itemize}
 
-A tanítás végeztével az eredmények a keretrendszer működése szerint az .ini fájlban megadott \pythoninline{outputdir} mappába kerülnek (a fenti példában \pythoninline{pictures/beta_vae_tuned}). Ebben a directoryban a program a reprodukálhatóság és visszakövethetőség érdekében elmenti a tanítás összes hiperparaméterét egy (\pythoninline{all_params.ini}) .ini fájlban. Eltáródik továbbá magának a hálónak az architektúrája az \pythoninline{encoder.json} és \pythoninline{generator.json} fájlokban (közvetlenül ezt használja a program egy háló beolvasásához). Természetesen azt is el kell menteni, hogy mi lett a tanítás eredménye, vagyis a háló éleinek végleges súlyait. Ezeket a \pythoninline{encoder.h5} és \pythoninline{generator.h5} fájlokban tároljuk el. A háló utólagos kiértékelése és korábban ismeretlen adatokra futtatása esetén a program ezekből a fájlokból olvassa be és építi fel a hálót.
+A tanítás végeztével az eredmények a keretrendszer működése szerint az .ini fájlban megadott \pythoninline{outputdir} mappába kerülnek (\pythoninline{pictures/beta_vae_tuned}).\\ Ebben a directoryban a program a reprodukálhatóság és visszakövethetőség érdekében elmenti a tanítás összes hiperparaméterét egy (\pythoninline{all_params.ini}) .ini fájlban. Eltáródik továbbá magának a hálónak az architektúrája az \pythoninline{encoder.json} és \pythoninline{generator.json} fájlokban (közvetlenül ezt használja a program egy háló beolvasásához). Természetesen azt is el kell menteni, hogy mi lett a tanítás eredménye, vagyis a háló éleinek végleges súlyait. Ezeket a \pythoninline{encoder.h5} és \pythoninline{generator.h5} fájlokban tároljuk el. A háló utólagos kiértékelése és korábban ismeretlen adatokra futtatása esetén a program ezekből a fájlokból olvassa be és építi fel a hálót.
 
 Ezeken az alapvetően szükséges fájlokon kívül a mi programunk kiment egyéb -- a tanítás hatékonyságát szemléltető -- kép fájlokat is. Ez néhány epochonként történik meg.
 
@@ -854,7 +854,7 @@ A \ref{interp}.~ábrán látható négy rész ábra mind a fentiek alapján gene
 \end{center}
 \end{figure}
 
-A $\beta=0.2$ esetben azt látjuk, a három input kép sikeresen rekonstruálódik, azonban a két eltolási transzformáció összege (jobb alsó kis kép) szinte megegyezik a $\vec{C}$ vektorral, ami arra utal, hogy a látens térben $A$ és $B$ túlságosan közel van egymáshoz. Azt azonban legalább megtanulta a háló, hogy az $A, B$ és $C$ látens pontok mint négyzeteket ábrázolnak, ezért a $4$. pontnak is négyzetnek kell lennie. Megfigyelhető továbbá a képek között egy olyan zóna is, ahol a háló üres képeket rajzol. Ez a $\beta$ alacsony értékéből adódik, mivel $\beta=0.2$ az origóból kifelé ható erő dominál, ezért a tanító adatpontok távol kerülnek egymástól és a térben lehetnek olyan részek, melyek semmilyen tanító adatponthoz nem esnek közel. A hálónak tehát nincsen tapasztalata arról, hogy az ilyan látens vektorokhoz milyen képet kell generálnia, üres képeket ad.
+A $\beta=0.2$ esetben azt látjuk, a három input kép sikeresen rekonstruálódik, azonban a két eltolási transzformáció összege (jobb alsó kis kép) szinte megegyezik a $\vec{C}$ vektorral, ami arra utal, hogy a látens térben $A$ és $B$ túlságosan közel van egymáshoz. Azt azonban legalább megtanulta a háló, hogy az $A, B$ és $C$ látens pontok mint négyzeteket ábrázolnak, ezért a $4$. pontnak is négyzetnek kell lennie. Megfigyelhető továbbá a képek között egy olyan zóna is, ahol a háló üres képeket rajzol. Ez a $\beta$ alacsony értékéből adódik, mivel $\beta=0.2$ az origóból kifelé ható erő dominál, ezért a tanító adatpontok távol kerülnek egymástól és a térben lehetnek olyan részek, melyek semmilyen tanító adatponthoz nem esnek közel. A hálónak tehát nincsen tapasztalata arról, hogy az ilyen látens vektorokhoz milyen képet kell generálnia, üres képeket ad.
 
 A $\beta=2$-es ábrán tulajdonképpen a $0.2$-es ábra problémái láthatóak, viszont az előnyei nélkül, tehát a háló nem tanulta meg a transzformációt, viszont már az input képeket is csak részben képes rekonstruálni (jó pozícióba rajzolja, jó méretben, az alakzat körvonala azonban már nem vehető ki), az összeg helyére pedig már kifejezetten hibásan, ellipszist rajzol.
 
@@ -905,54 +905,15 @@ A modellek kiértékelése során számos problémával szembesültem, például
 
 Ahol csak tudtam, próbáltam tompítani a zajt sokszori futtatással, majd átlagolással például a metrikák számolásánál minden érték úgy keletkezik, hogy sok különböző alakzatot eltolok, majd a rajtuk kiszámolt metrikákat átlagolom. 
 
-Egy másik, problémának nem nevezhető jelenség, hogy bizonyos paraméterek teljesen irrelevánsnak bizonyultak a látens tér strukturája szemponjából, pélidául a súly felejtés.
+Egy másik, problémának nem nevezhető jelenség, hogy bizonyos paraméterek teljesen irrelevánsnak bizonyultak a látens tér struktúrája szempontjából, például a súly felejtés.
 
 Konvolúciós hálók révén egyéb paraméterek reprezentáció-hatását is meg lehetne vizsgálni: padding, stride, filterek száma, a háló rétegeinek dimenziói és száma.
 
-Tesztelhető lenne ezek mellett az "Understanding disentangling in $\beta$-VAE" \cite{dbvae} publikációban bemutatott módszer is, amely a úgy segíti a disentanglementet, hogy közben a rekonstrukciós képesség nem romlik olyan mértékben, mint a hagyományos $\beta$-VAE esetében.
+Tesztelhető lenne ezek mellett az ,,Understanding disentangling in $\beta$-VAE'' \cite{bvae} publikációban bemutatott módszer is, amely a úgy segíti a disentanglementet, hogy közben a rekonstrukciós képesség nem romlik olyan mértékben, mint a hagyományos $\beta$-VAE esetében.
 
-További lehetőség lenne dolgozatban látott elemzés elvégzése más, akár nem szintetikus adahalmazokon is, mint például a Celeba adathalmaz.
+További lehetőség lenne dolgozatban látott elemzés elvégzése más, akár nem szintetikus adathalmazokon is, mint például a Celeba adathalmaz.
 
-\begin{thebibliography}{9}
 
-\bibitem{ConvNet}
-CS231n Convolutional Neural Networks for Visual Recognition:\\
-\url{http://cs231n.github.io/convolutional-networks/}
 
-\bibitem{Dsprite}
-{Loic Matthey and Irina Higgins and Demis Hassabis and Alexander Lerchner},
-\textit{dSprites: Disentanglement testing Sprites dataset},\\
-\url{https://github.com/deepmind/dsprites-dataset/
-} (2017)
-
-\bibitem{VAE}
-Variational Autoencoders Explained\\
-\url{http://kvfrans.com/variational-autoencoders-explained/}
-
-\bibitem{original VAE}
-Variational Autoencoder\\
-\url{https://arxiv.org/abs/1606.05908}
-
-\bibitem{bvae}
-Understanding disentangling in $\beta$-VAE\\
-\url{https://arxiv.org/abs/1804.03599}
-
-\bibitem{dbvae}
-Understanding disentangling in $\beta$-VAE\\
-\url{https://arxiv.org/abs/1804.03599}
-
-\bibitem{original GAN}
-Generative Adverarial Networks\\
-\url{https://arxiv.org/abs/1406.2661}
-
-\bibitem{tensorflow}
-TensorFlow\\
-\url{https://www.tensorflow.org/}
-
-\bibitem{Keras}
-Keras\\
-\url{https://keras.io/}
-
-\end{thebibliography}
 
 %\end{document}

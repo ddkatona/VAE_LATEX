@@ -1,0 +1,19 @@
+This is BibTeX, Version 0.99dThe top-level auxiliary file: diploma.aux
+A level-1 auxiliary file: project.aux
+A level-1 auxiliary file: titlepage.aux
+A level-1 auxiliary file: declaration.aux
+A level-1 auxiliary file: abstract.aux
+A level-1 auxiliary file: thesis.aux
+A level-1 auxiliary file: acknowledgement.aux
+A level-1 auxiliary file: mybib.aux
+The style file: plain.bst
+I found no \bibdata command---while reading file diploma.aux
+Warning--I didn't find a database entry for "ConvNet"
+Warning--I didn't find a database entry for "original-GAN"
+Warning--I didn't find a database entry for "original-VAE"
+Warning--I didn't find a database entry for "VAE"
+Warning--I didn't find a database entry for "bvae"
+Warning--I didn't find a database entry for "Dsprite"
+Warning--I didn't find a database entry for "tensorflow"
+Warning--I didn't find a database entry for "Keras"
+(There was 1 error message)

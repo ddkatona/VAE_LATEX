@@ -7,7 +7,7 @@ A dolgozatban bemutatjuk a manapság legsikeresebb generatív modelleket, külö
 
 A vizsgálathoz szükséges programokat Kerasban, Python nyelven a numpy/scikit-learn/tensorflow/matplotlib könyvtárakra építve implementáljuk, modelljeiket pedig nagy teljesítményű grafikus kártyákon futtatjuk. 
 
-Az így felálló keretrendszerrel számos különböző VAE alapú modellt hozunk létre és ezeket reprezentáció szempontjából, saját metrikáink alapján hasonlítjuk össze egymással. Különös hangsúlyt fektetünk a $\beta$-VAE hálók $\beta$ hiperparaméterének reprezentáció-hatására, illetve a rekonstrukciós képesség és a látens tér struktúrájának egymáshoz való viszonyára. A reprezentációk személtetéséhez többféle ábrát is generálunk minden modellhez, illetve modell halmazhoz. 
+Az így felálló keretrendszerrel számos különböző VAE alapú modellt hozunk létre és ezeket reprezentáció szempontjából, saját metrikáink alapján hasonlítjuk össze egymással. Különös hangsúlyt fektetünk a $\beta$-VAE hálók $\beta$ hiperparaméterének rep\-re\-zen\-táció-hatására, illetve a rekonstrukciós képesség és a látens tér struktúrájának egymáshoz való viszonyára. A reprezentációk személtetéséhez többféle ábrát is generálunk minden modellhez, illetve modell halmazhoz. 
 
 \vfill
 
@@ -16,10 +16,10 @@ Az így felálló keretrendszerrel számos különböző VAE alapú modellt hozu
 %----------------------------------------------------------------------------
 \chapter*{Abstract}\addcontentsline{toc}{chapter}{Abstract}
 
-A dolgozatban bemutatjuk a manapság legsikeresebb generatív modelleket, különös hangsúlyt fektetve az autoencoder alapú VAE, illetve $\beta$-VAE architektúrákra, melyek generatív modellként is alkalmazhatóak, de a reprezentáció-tanulásban is komoly jelentőségre tettek szert. Munkánk során különböző metrikák megalkotásával formalizáláljuk és számszerűsítjük, hogy ezen modellek reprezentációi mennyire felelnek meg az ilyen reprezentációk iránt támasztott informális követelményeknek. Ehhez egy szintetikus adathalmazt, a Dsprite-ot használjuk.
+The paper presents the most successful generative models nowadays, with particular emphasis on autoencoder-based VAE and $\beta$-VAE architectures, which can be used as a generative model, but have also gained significant importance in representational learning. Through our work, we create and quantify how the representations of these models meet the informal requirements for such representations by creating different metrics. For this, we use a synthetic data set, Dsprite.
 
-A vizsgálathoz szükséges programokat Kerasban, Python nyelven a numpy/scikit-learn/tensorflow/matplotlib könyvtárakra építve implementáljuk, modelleiket pedig nagy teljesítményű grafikus kártyákon futtatjuk. 
+The programs for testing are implemented in Keras, Python built on the libraries of numpy/scikit-learn/tensorflow/matplotlib, and we run their models on high-performance graphics cards.
 
-Az így felálló keretrendszerrel számos különböző VAE alapú modellt hozunk létre és ezeket reprezentáció szempontjából, saját metrikáink alapján hasonlítjuk össze egymással. Különös hangsúlyt fektetünk a $\beta$-VAE hálók $\beta$ hiperparaméterének reprezentáció-hatására, illetve a rekonstrukciós képesség és a látens tér struktúrájának egymáshoz való viszonyára. A repezentációk személtetéséhez többféle ábrát is generálunk minden modellhez, illetve modell halmazhoz.
+With this framework, we create a variety of VAE-based models and compare their representations to each other, based on our own metrics. Particular emphasis is placed on the representation effect of the $\beta$ hyperparameters of $\beta$-VAE nets, and on the relationship between the  capability of reconstruction and latent space. For the visialization of representations, we generate several figures for each model and model set.
 \vfill
 
