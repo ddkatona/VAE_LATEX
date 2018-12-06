@@ -306,7 +306,7 @@ Az utóbbi néhány évben nagy fejlődésen mentek keresztül a GAN-ok. A \ref{
 A variational autoencoderek a GAN-okhoz hasonlóan generatív modellek, azonban a felépítésük -- ahogy a nevükben is szerepel --  nagyban hasonlítanak a hagyományos autoencoderekhez.
 Első ránézésre az autoencoderek is alkalmasnak tűnnek a generálásra, hiszen a decoder komponensük képes egy látens vektorból előállítani egy adatpontot, ezért ha egy korábban ismeretlen látens vektorra futtatjuk a decodert, akkor egy új, de mégis hiteles adatot kapnánk. Ez azonban nem működik, mert az autoencoder látens terében a gyakorlatban bizonyos térrészek teljesen érintetlenül maradnak, így a háló nincs felkészülve arra, hogy a látens tér azon szegmenséből generáljon (decode-oljon) adatot.
 
-Ezt a problémát oldja meg a VAE \cite{original-VAE, VAE} azzal a trükkel, hogy az encodere nem egy konkrét látens vektort állít elő, mint az adat reprezentációs alakja, hanem egy normális eloszlást. A variational autoencodereknél valójában ez az eloszlás reprezentálja az adatot, ami két vektort jelent: egy várható érték és szórás vektort, melyek koordinátánként értendőek a látens vektorra nézve. A tanítás során tehát a decoder (amit a VAE esetében már generátornak is nevezhetünk) inputja egy véletlenszerű vektor ebből az eloszlásból (lásd \ref{vae}.~ábra).
+Ezt a problémát oldja meg a VAE \cite{VAE2, original-VAE, VAE} azzal a trükkel, hogy az encodere nem egy konkrét látens vektort állít elő, mint az adat reprezentációs alakja, hanem egy normális eloszlást. A variational autoencodereknél valójában ez az eloszlás reprezentálja az adatot, ami két vektort jelent: egy várható érték és szórás vektort, melyek koordinátánként értendőek a látens vektorra nézve. A tanítás során tehát a decoder (amit a VAE esetében már generátornak is nevezhetünk) inputja egy véletlenszerű vektor ebből az eloszlásból (lásd \ref{vae}.~ábra).
 
 \begin{figure}[h!]
 \begin{center}
@@ -331,7 +331,7 @@ A tanítás végeztével tehát a látens térből bárhonnan választhatunk vé
 
 \section{Módosított variational autoencoderek ($\beta$-VAE)}
 
-A $\beta$-VAE-k \cite{bvae} nagyon hasonlóak a rendes VAE hálókhoz, mindössze a veszteségfüggvényben különböznek egymástól. A VAE-k esetében ez a veszteség két komponensből áll: a rekonstrukciós veszteségből és a KL divergenciából. A $\beta$-VAE-ben szereplő béta mindössze egy konstanst jelent, amely azt határozza meg, hogy a teljes veszteség kiszámításnál a két komponenst milyen súllyal számoljuk, egészen konkrétan a rekonstrukciós veszteségnek mindig $1$, a KL divergenciának pedig $\beta$ a súlya. A veszteségfüggvény tehát egy $\beta$ szorzóval egészül ki az alábbi módon:
+A $\beta$-VAE-k \cite{bVAE2, bvae} nagyon hasonlóak a rendes VAE hálókhoz, mindössze a veszteségfüggvényben különböznek egymástól. A VAE-k esetében ez a veszteség két komponensből áll: a rekonstrukciós veszteségből és a KL divergenciából. A $\beta$-VAE-ben szereplő béta mindössze egy konstanst jelent, amely azt határozza meg, hogy a teljes veszteség kiszámításnál a két komponenst milyen súllyal számoljuk, egészen konkrétan a rekonstrukciós veszteségnek mindig $1$, a KL divergenciának pedig $\beta$ a súlya. A veszteségfüggvény tehát egy $\beta$ szorzóval egészül ki az alábbi módon:
 $$ \mathbb{E}_{q_\phi(z|x)} [\log p_\phi(x|z)] + \beta D_{KL}(q_\phi(z|x)||p_\phi(z))$$
 A rendes VAE hálók tehát valójában $\beta=1$ paraméterű $\beta$-VAE-k.
 
