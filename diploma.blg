@@ -9,6 +9,7 @@ A level-1 auxiliary file: mybib.aux
 The style file: plain.bst
 I found no \bibdata command---while reading file diploma.aux
 Warning--I didn't find a database entry for "ConvNet"
+Warning--I didn't find a database entry for "Autoencoder"
 Warning--I didn't find a database entry for "original-GAN"
 Warning--I didn't find a database entry for "original-VAE"
 Warning--I didn't find a database entry for "VAE"
